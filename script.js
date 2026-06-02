@@ -212,7 +212,8 @@ function getDefaultState() {
 
     message: "",
     effect: "",
-    gameOver: false
+    gameOver: false,
+    currentActionIds: []
   };
 }
 
@@ -250,6 +251,9 @@ function newEncounter(prefix = "") {
   state.message = prefix || state.scene.text;
   state.effect = state.event ? `事件「${state.event.name}」：${state.event.text}｜${eventEffect}` : eventEffect;
 
+  // 每个新场景随机抽取 4 个可用行动，之后本回合内保持不变。
+  state.currentActionIds = chooseRandomActionIds();
+
   applyPassiveDamage();
   normalizeState();
   render();
@@ -257,14 +261,14 @@ function newEncounter(prefix = "") {
 }
 
 function applyPassiveDamage(multiplier = 1) {
-  const hpLoss = Math.max(5, state.smellLevel * 0.13 * multiplier);
+  const hpLoss = Math.max(4, state.smellLevel * 0.115 * multiplier);
   const airLoss = Math.max(4, state.smellLevel * 0.12 * multiplier);
   const patienceLoss = Math.max(3, state.smellLevel * 0.08 * multiplier);
 
   state.hp -= hpLoss;
   state.air -= airLoss;
   state.patience -= patienceLoss;
-  state.sanity -= state.smellLevel * 0.045 * multiplier;
+  state.sanity -= state.smellLevel * 0.04 * multiplier;
 
   if (state.scene.id === "elevator") {
     state.hp -= 8;
@@ -395,6 +399,50 @@ const actions = [
         state.message = "清新剂短暂有效。";
         state.effect = "空气 +24，气味 -14，清新剂 -1。";
       }
+    }
+  },
+  {
+    id: "deepBreath",
+    title: "离场透气",
+    desc: "稳定恢复精神，但学习会慢。",
+    available: () => state.scene.id !== "elevator",
+    run: () => {
+      state.hp += 18;
+      state.sanity += 12;
+      state.patience += 6;
+      state.study -= 10;
+      state.escapeCount += 1;
+      state.message = "你离场透气两分钟。灵魂重新上线。";
+      state.effect = "精神 +18，理智 +12，忍耐 +6，学习 -10，逃离 +1。";
+    }
+  },
+  {
+    id: "shower",
+    title: "自己洗澡",
+    desc: "宿舍可用，恢复精神和洁净。",
+    available: () => state.scene.id === "dorm",
+    run: () => {
+      state.hp += 22;
+      state.sanity += 10;
+      state.cleanliness += 28;
+      state.air += 8;
+      state.study -= 8;
+      state.message = "你先去洗澡。嫌弃别人之前，自己先做示范。";
+      state.effect = "精神 +22，理智 +10，洁净 +28，空气 +8，学习 -8。";
+    }
+  },
+  {
+    id: "studyBreak",
+    title: "闭眼缓冲",
+    desc: "任何场景可用，小幅回血。",
+    available: () => true,
+    run: () => {
+      state.hp += 10;
+      state.sanity += 8;
+      state.patience += 4;
+      state.study -= 5;
+      state.message = "你闭眼十秒，假装世界很清新。";
+      state.effect = "精神 +10，理智 +8，忍耐 +4，学习 -5。";
     }
   },
   {
@@ -581,11 +629,51 @@ function renderInventory() {
   $("inventory").innerHTML = `<div class="inventory">${items.map(i => `<span class="item">${i}</span>`).join("")}</div>`;
 }
 
+function shuffleArray(arr) {
+  return [...arr].sort(() => Math.random() - 0.5);
+}
+
+function chooseRandomActionIds() {
+  const allAvailable = actions
+    .filter(action => action.available())
+    .map(action => action.id);
+
+  // 为了避免完全随机导致“没有可恢复选项”或“没有互动选项”，设置一点点保底。
+  const recoveryPool = ["deepBreath", "studyBreak", "shower", "mint"].filter(id => {
+    const action = actions.find(a => a.id === id);
+    return action && action.available();
+  });
+
+  const interactionPool = ["gentle", "direct", "window", "move"].filter(id => {
+    const action = actions.find(a => a.id === id);
+    return action && action.available();
+  });
+
+  const selected = [];
+
+  if (recoveryPool.length > 0) selected.push(pick(recoveryPool));
+  if (interactionPool.length > 0) selected.push(pick(interactionPool));
+
+  shuffleArray(allAvailable).forEach(id => {
+    if (selected.length < 4 && !selected.includes(id)) selected.push(id);
+  });
+
+  // 极端情况下如果可用选项不足 4 个，就只显示实际可用的，不强行放灰色按钮。
+  return selected.slice(0, 4);
+}
+
 function renderActions() {
-  $("actions").innerHTML = actions.map(action => {
-    const ok = action.available();
+  if (!state.currentActionIds || state.currentActionIds.length === 0) {
+    state.currentActionIds = chooseRandomActionIds();
+  }
+
+  const selectedActions = state.currentActionIds
+    .map(id => actions.find(a => a.id === id))
+    .filter(action => action && action.available());
+
+  $("actions").innerHTML = selectedActions.map(action => {
     return `
-      <button class="action-btn" ${ok ? "" : "disabled"} onclick="doAction('${action.id}')">
+      <button class="action-btn" onclick="doAction('${action.id}')">
         <strong>${action.title}</strong>
         <span>${action.desc}</span>
       </button>
