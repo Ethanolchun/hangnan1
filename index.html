@@ -1,107 +1,366 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>航南生存模拟器：气味危机</title>
-  <link rel="stylesheet" href="style-v7.css?v=7" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>航南生存模拟器：气味危机</title>
+<style>
+*{box-sizing:border-box}
+:root{
+  --text:#172033;--muted:#667085;--line:rgba(148,163,184,.35);
+  --primary:#5967ff;--purple:#7c3aed;--shadow:0 24px 80px rgba(15,23,42,.18)
+}
+body{
+  margin:0;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(circle at 5% 10%,#dbeafe 0,transparent 30%),
+    radial-gradient(circle at 95% 15%,#fce7f3 0,transparent 26%),
+    radial-gradient(circle at 50% 100%,#dcfce7 0,transparent 30%),
+    linear-gradient(135deg,#f8fafc,#eef2ff);
+}
+#app{width:min(1160px,calc(100% - 32px));margin:0 auto;padding:28px 0}
+.screen{display:none}.screen.active{display:block}
+.card,.panel,.main-panel,.meta{
+  border:1px solid var(--line);background:rgba(255,255,255,.84);box-shadow:var(--shadow);backdrop-filter:blur(18px)
+}
+.card{width:min(820px,100%);margin:9vh auto;padding:42px;border-radius:30px}
+.hero h1,.end h1{margin:18px 0 0;font-size:clamp(38px,6vw,68px);line-height:1;letter-spacing:-.05em}
+.hero h2{margin:8px 0 18px;font-size:clamp(28px,4vw,48px);color:var(--purple)}
+.hero p,.end p{line-height:1.8;color:#475569;font-size:17px}
+.tag{display:inline-flex;padding:7px 12px;border-radius:999px;color:#384fd8;background:rgba(89,103,255,.12);font-weight:800;font-size:13px}
+button{font:inherit}
+.primary,.ghost,.action{cursor:pointer;border:0;transition:.18s ease}
+.primary:hover,.ghost:hover,.action:hover{transform:translateY(-2px)}
+.primary{padding:14px 26px;border-radius:999px;color:white;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--purple));box-shadow:0 14px 32px rgba(89,103,255,.28)}
+.ghost{padding:10px 16px;margin-left:8px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.75);font-weight:700}
+.topbar{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:16px}
+.topbar h1{margin:0;font-size:clamp(25px,3vw,36px)}.topbar p{margin:6px 0 0;color:var(--muted)}
+.meta-grid{display:grid;grid-template-columns:130px 140px 1fr;gap:14px;margin-bottom:16px}
+.meta{min-height:84px;padding:16px;border-radius:22px}.meta span{display:block;color:var(--muted);font-size:13px}.meta b{display:block;margin-top:5px;font-size:30px}.meta.wide b{font-size:28px}
+.game-grid{display:grid;grid-template-columns:330px 1fr;gap:16px}.panel,.main-panel{border-radius:28px;padding:20px}
+.panel h3{margin:8px 0 14px}.stat{margin-bottom:13px}.stat-head{display:flex;justify-content:space-between;margin-bottom:6px;color:#334155;font-size:14px}
+.bar{height:11px;border-radius:999px;background:rgba(148,163,184,.25);overflow:hidden}.fill{height:100%;border-radius:inherit;transition:width .25s ease}
+.chips{display:flex;flex-wrap:wrap;gap:8px}.chip{padding:8px 10px;border-radius:13px;background:rgba(89,103,255,.1);font-size:13px;font-weight:800;color:#334155}
+.records{display:grid;grid-template-columns:1fr 1fr;gap:8px}.records div{padding:10px;border-radius:14px;background:rgba(15,23,42,.05);color:#475569;font-size:13px}
+.character-box{
+  position:relative;min-height:230px;display:grid;grid-template-columns:120px 1fr;gap:18px;align-items:center;padding:28px;border-radius:24px;overflow:hidden;
+  background:linear-gradient(135deg,rgba(89,103,255,.14),rgba(124,58,237,.12)),repeating-linear-gradient(45deg,rgba(255,255,255,.32) 0 10px,rgba(255,255,255,.08) 10px 20px)
+}
+.smell{position:absolute;left:16px;top:16px;padding:8px 12px;border-radius:999px;color:white;background:rgba(15,23,42,.74);font-weight:800;font-size:13px}
+.avatar{width:112px;height:112px;display:grid;place-items:center;border-radius:30px;font-size:64px;background:rgba(255,255,255,.78);box-shadow:0 14px 40px rgba(15,23,42,.12)}
+.character-box h2{margin:0 0 8px;font-size:28px}.character-box p{margin:0;line-height:1.7;color:#475569}
+.story{margin-top:16px;padding:20px;border:1px solid var(--line);border-radius:22px;background:rgba(255,255,255,.74)}
+.event{display:inline-flex;padding:6px 10px;border-radius:999px;background:rgba(245,158,11,.14);color:#92400e;font-weight:800;font-size:13px}
+.story h2{margin:12px 0 8px;font-size:24px}.story p{margin:0;line-height:1.65;color:#475569}
+.effect{margin-top:10px!important;padding-top:10px;border-top:1px dashed var(--line);color:#172033!important;font-weight:800}
+.actions{display:grid!important;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
+.action{display:block!important;min-height:88px;padding:15px;border-radius:18px;border:1px solid var(--line);background:rgba(255,255,255,.9);text-align:left}
+.action b{display:block;margin-bottom:6px;font-size:17px}.action span{display:block;color:var(--muted);font-size:13px;line-height:1.45}
+.ending-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin:24px 0}.ending-grid div{padding:14px;border-radius:18px;background:rgba(15,23,42,.05)}.ending-grid span{display:block;color:var(--muted);font-size:13px}.ending-grid b{display:block;margin-top:4px;font-size:24px}
+.modal{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:18px;background:rgba(15,23,42,.5)}.modal.hidden{display:none}.modal-card{position:relative;width:min(620px,100%);padding:30px;border-radius:26px;background:white;box-shadow:var(--shadow)}.modal-card li{line-height:1.8;color:#475569}.close{position:absolute;top:16px;right:18px;width:34px;height:34px;border:0;border-radius:999px;background:rgba(15,23,42,.08);cursor:pointer;font-size:22px}
+@media(max-width:900px){.topbar{flex-direction:column;align-items:flex-start}.meta-grid,.game-grid,.character-box,.actions,.ending-grid{grid-template-columns:1fr}.card{padding:26px}}
+
+/* Mobile-first V2 layout: actions first, compact status below */
+.game-grid{display:block!important}
+.main-panel{width:100%}
+.compact-status{
+  margin-top:16px;
+  padding:14px;
+  border:1px solid var(--line);
+  border-radius:22px;
+  background:rgba(255,255,255,.72);
+}
+.compact-status summary{
+  cursor:pointer;
+  font-weight:900;
+  color:#172033;
+  list-style:none;
+}
+.compact-status summary::-webkit-details-marker{display:none}
+.status-grid{
+  display:grid;
+  grid-template-columns:1.25fr .9fr;
+  gap:14px;
+  margin-top:12px;
+}
+.compact-status h3{
+  margin:6px 0 10px;
+  font-size:16px;
+}
+.mini-stats{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:8px 12px;
+}
+.mini-stats .stat{
+  margin-bottom:0;
+}
+.mini-stats .stat-head{
+  font-size:12px;
+  margin-bottom:4px;
+}
+.mini-stats .bar{
+  height:8px;
+}
+.compact-status .chip{
+  padding:6px 8px;
+  font-size:12px;
+}
+.compact-status .records{
+  grid-template-columns:repeat(4,1fr);
+  gap:6px;
+}
+.compact-status .records div{
+  padding:8px;
+  font-size:12px;
+}
+.result-card{
+  text-align:left;
+}
+.result-card .primary{
+  margin-top:18px;
+}
+@media(max-width:900px){
+  #app{width:min(100% - 20px,1160px);padding:14px 0}
+  .topbar{margin-bottom:10px}
+  .meta-grid{grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+  .meta{min-height:auto;padding:10px;border-radius:16px}
+  .meta b,.meta.wide b{font-size:18px}
+  .character-box{
+    min-height:auto;
+    grid-template-columns:72px 1fr;
+    gap:12px;
+    padding:46px 14px 14px;
+    border-radius:20px;
+  }
+  .avatar{width:72px;height:72px;border-radius:20px;font-size:42px}
+  .character-box h2{font-size:21px}
+  .character-box p{font-size:13px;line-height:1.55}
+  .story{padding:14px;margin-top:10px}
+  .story h2{font-size:20px}
+  .story p{font-size:13px;line-height:1.55}
+  .actions{grid-template-columns:repeat(2,1fr)!important;gap:8px;margin-top:10px}
+  .action{min-height:72px;padding:11px;border-radius:15px}
+  .action b{font-size:15px}
+  .action span{font-size:12px}
+  .status-grid{grid-template-columns:1fr}
+  .mini-stats{grid-template-columns:repeat(2,1fr)}
+  .compact-status{padding:12px;margin-top:10px}
+  .compact-status .records{grid-template-columns:repeat(2,1fr)}
+  .modal-card{width:min(94vw,620px);padding:22px}
+}
+
+</style>
 </head>
+
 <body>
-  <main id="app">
-    <section id="startScreen" class="screen active">
-      <div class="card hero">
-        <span class="tag">V6 Clean · Random 4 Choices</span>
+<main id="app">
+  <section id="startScreen" class="screen active">
+    <div class="card hero">
+      <span class="tag">Mobile Compact · Result Popup</span>
+      <h1>航南生存模拟器</h1>
+      <h2>气味危机</h2>
+      <p>每天 3 回合，共 7 天。第 3 回合固定回宿舍。每回合只随机出现 <strong>4 个可用选项</strong>。状态栏已移到选项下方，每回合结果会弹窗显示。</p>
+      <button class="primary" id="startBtn">开始游戏</button>
+    </div>
+  </section>
+
+  <section id="gameScreen" class="screen">
+    <header class="topbar">
+      <div>
         <h1>航南生存模拟器</h1>
-        <h2>气味危机</h2>
-        <p>
-          每天 3 回合，共 7 天。第 3 回合固定回宿舍。每回合只随机出现
-          <strong>4 个可用选项</strong>，道具全部只有 1 次。
-        </p>
-        <button class="primary" id="startBtn">开始游戏</button>
+        <p id="subtitle">每回合只随机出现 4 个选项。</p>
       </div>
+      <div>
+        <button class="ghost" id="rulesBtn">规则</button>
+        <button class="ghost" id="restartBtn">重开</button>
+      </div>
+    </header>
+
+    <section class="meta-grid">
+      <div class="meta"><span>天数</span><b id="dayText">1 / 7</b></div>
+      <div class="meta"><span>回合</span><b id="roundText">1 / 3</b></div>
+      <div class="meta wide"><span>场景</span><b id="sceneText">航南教室</b></div>
     </section>
 
-    <section id="gameScreen" class="screen">
-      <header class="topbar">
-        <div>
-          <h1>航南生存模拟器</h1>
-          <p id="subtitle">硬核模式：少选项、高风险、每天宿舍 Boss。</p>
-        </div>
-        <div>
-          <button class="ghost" id="rulesBtn">规则</button>
-          <button class="ghost" id="restartBtn">重开</button>
-        </div>
-      </header>
-
-      <section class="meta-grid">
-        <div class="meta"><span>天数</span><b id="dayText">1 / 7</b></div>
-        <div class="meta"><span>回合</span><b id="roundText">1 / 3</b></div>
-        <div class="meta wide"><span>场景</span><b id="sceneText">航南教室</b></div>
-      </section>
-
-      <section class="game-grid">
-        <aside class="panel">
-          <h3>状态</h3>
-          <div id="stats"></div>
-
-          <h3>背包</h3>
-          <div id="inventory" class="chips"></div>
-
-          <h3>记录</h3>
-          <div class="records">
-            <div>提醒 <b id="remindText">0</b></div>
-            <div>爆发 <b id="explodeText">0</b></div>
-            <div>逃离 <b id="escapeText">0</b></div>
-            <div>公约 <b id="ruleText">无</b></div>
+    <section class="game-grid">
+      <section class="main-panel">
+        <div class="character-box">
+          <div class="smell" id="smellText">气味强度 50</div>
+          <div class="avatar" id="avatarText">🧍</div>
+          <div>
+            <h2 id="characterName">人物</h2>
+            <p id="characterDesc">人物描述</p>
           </div>
-        </aside>
+        </div>
 
-        <section class="main-panel">
-          <div class="character-box">
-            <div class="smell" id="smellText">气味强度 50</div>
-            <div class="avatar" id="avatarText">🧍</div>
-            <div>
-              <h2 id="characterName">人物</h2>
-              <p id="characterDesc">人物描述</p>
+        <article class="story">
+          <span class="event" id="eventText">普通遭遇</span>
+          <h2 id="storyTitle">标题</h2>
+          <p id="storyText">文本</p>
+          <p class="effect" id="effectText">效果</p>
+        </article>
+
+        <div class="actions" id="actions"></div>
+
+        <section class="compact-status">
+          <details open>
+            <summary>状态 / 背包 / 记录</summary>
+            <div class="status-grid">
+              <div>
+                <h3>状态</h3>
+                <div id="stats" class="mini-stats"></div>
+              </div>
+              <div>
+                <h3>背包</h3>
+                <div id="inventory" class="chips"></div>
+                <h3>记录</h3>
+                <div class="records">
+                  <div>提醒 <b id="remindText">0</b></div>
+                  <div>爆发 <b id="explodeText">0</b></div>
+                  <div>逃离 <b id="escapeText">0</b></div>
+                  <div>公约 <b id="ruleText">无</b></div>
+                </div>
+              </div>
             </div>
-          </div>
-
-          <article class="story">
-            <span class="event" id="eventText">普通遭遇</span>
-            <h2 id="storyTitle">标题</h2>
-            <p id="storyText">文本</p>
-            <p class="effect" id="effectText">效果</p>
-          </article>
-
-          <div class="actions" id="actions"></div>
+          </details>
         </section>
       </section>
     </section>
+  </section>
 
-    <section id="endScreen" class="screen">
-      <div class="card end">
-        <span class="tag">Ending</span>
-        <h1 id="endingTitle">结局</h1>
-        <p id="endingText">描述</p>
-        <div class="ending-grid" id="endingStats"></div>
-        <button class="primary" id="againBtn">再来一局</button>
-      </div>
-    </section>
-  </main>
-
-  <div class="modal hidden" id="modal">
-    <div class="modal-card">
-      <button id="closeModal" class="close">×</button>
-      <h2>规则</h2>
-      <ul>
-        <li>每天 3 回合，第 3 回合必定是宿舍。</li>
-        <li>每回合随机抽取 4 个当前可用选项，只显示 4 个。</li>
-        <li>口罩、清新剂、薄荷糖、洗衣液、话术卡都只有 1 次。</li>
-        <li>精神、空气、忍耐、关系、洁净或理智归零都会失败。</li>
-      </ul>
+  <section id="endScreen" class="screen">
+    <div class="card end">
+      <span class="tag">Ending</span>
+      <h1 id="endingTitle">结局</h1>
+      <p id="endingText">描述</p>
+      <div class="ending-grid" id="endingStats"></div>
+      <button class="primary" id="againBtn">再来一局</button>
     </div>
-  </div>
+  </section>
+</main>
 
-  <script src="script-v7.js?v=7"></script>
+<div class="modal hidden" id="resultModal">
+  <div class="modal-card result-card">
+    <h2 id="resultTitle">本回合结果</h2>
+    <p id="resultStory">结果描述</p>
+    <p class="effect" id="resultEffect">数值变化</p>
+    <button class="primary" id="continueBtn">继续</button>
+  </div>
+</div>
+
+<div class="modal hidden" id="modal">
+  <div class="modal-card">
+    <button id="closeModal" class="close">×</button>
+    <h2>规则</h2>
+    <ul>
+      <li>每天 3 回合，第 3 回合必定是宿舍。</li>
+      <li>每回合随机抽取 4 个当前可用选项，只显示 4 个。</li>
+      <li>口罩、清新剂、薄荷糖、洗衣液、话术卡都只有 1 次。</li>
+      <li>精神、空气、忍耐、关系、洁净或理智归零都会失败。</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+const MAX_DAY=7,MAX_ROUND=3,ACTIONS_PER_ROUND=4;
+const scenes=[
+{id:"classroom",name:"航南教室",difficulty:1.15,text:"教室门一开，空气先给你下马威。"},
+{id:"elevator",name:"电梯",difficulty:1.55,text:"电梯门合上，副本开始。"},
+{id:"canteen",name:"食堂",difficulty:1.0,text:"饭香和怪味同时入场。"},
+{id:"library",name:"自习区",difficulty:1.1,text:"这里很安静，但气味不守纪律。"},
+{id:"groupMeeting",name:"小组讨论",difficulty:1.3,text:"PPT 还没打开，空气已经开题。"},
+{id:"dorm",name:"宿舍",difficulty:1.65,text:"你回到宿舍。每日 Boss 刷新。"}];
+const characters=[
+{id:"winter",name:"冬眠型选手",avatar:"🧥",base:55,desc:"厚外套，乱头发，坚信冬天不用天天洗。",line:"“冬天没出汗吧？”"},
+{id:"sport",name:"运动直达型",avatar:"🏀",base:82,desc:"刚下球场，汗味还在热启动。",line:"“我就坐一会儿。”"},
+{id:"sock",name:"袜子炼金术士",avatar:"🧦",base:92,desc:"床边袜团疑似培养出文明。",line:"“别动，我还要穿。”"},
+{id:"perfume",name:"香水掩盖派",avatar:"🧴",base:72,desc:"香水很努力，底味更努力。",line:"“我喷香水了啊。”"},
+{id:"study",name:"沉浸学习型",avatar:"💻",base:66,desc:"电脑不关，人不洗漱，持续输出。",line:"“洗澡会打断思路。”"},
+{id:"crowded",name:"密闭叠加型",avatar:"🧍‍♂️",base:96,desc:"不是一个人，是一群人。",line:"“挤一挤就到了。”"},
+{id:"normal",name:"普通闷热型",avatar:"😶",base:42,desc:"没有特别严重，但空气很摆。",line:"“还行吧？”"}];
+const events=[
+{name:"门窗紧闭",text:"窗户关死了。",sceneOnly:null,apply:s=>{s.air-=18;s.smell+=16;return"空气 -18，气味 +16"}},
+{name:"运动后入场",text:"汗味增援抵达。",sceneOnly:null,apply:s=>{s.smell+=30;s.patience-=10;return"气味 +30，忍耐 -10"}},
+{name:"袜子暴击",text:"袜子完成进化。",sceneOnly:"dorm",apply:s=>{s.smell+=42;s.sanity-=20;return"气味 +42，理智 -20"}},
+{name:"北航大风",text:"风来了，正义来了。",sceneOnly:null,apply:s=>{s.air+=22;s.smell-=18;return"空气 +22，气味 -18"}},
+{name:"DDL 压顶",text:"你被迫硬学。",sceneOnly:null,apply:s=>{s.study+=16;s.hp-=16;return"学习 +16，精神 -16"}},
+{name:"突然停电",text:"黑暗放大了一切。",sceneOnly:null,apply:s=>{s.sanity-=16;s.air-=12;return"理智 -16，空气 -12"}},
+{name:"奇迹洗澡",text:"有人洗澡了。",sceneOnly:null,apply:s=>{s.smell-=45;s.relationship+=8;return"气味 -45，关系 +8"}}];
+let state={};
+const $=id=>document.getElementById(id);
+function clamp(v,min=0,max=100){return Math.max(min,Math.min(max,Math.round(v)))}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)]}
+function shuffle(arr){return[...arr].sort(()=>Math.random()-.5)}
+function defaultState(){return{day:1,round:1,hp:100,air:100,patience:72,courage:50,relationship:78,study:0,clean:92,sanity:88,smell:60,scene:scenes[0],character:characters[0],event:null,mask:1,spray:1,mint:1,detergent:1,talkCard:1,hasRule:false,remind:0,explode:0,escape:0,windowOpened:false,currentActions:[],story:"",effect:"",gameOver:false,pendingFailure:null}}
+const actions=[
+{id:"endure",title:"忍了",desc:"学习快，但掉状态疼。",available:()=>true,run:()=>{state.study+=13;state.patience-=22;state.hp-=state.smell*.22;state.sanity-=12;state.story="你忍了。知识进脑，气味入魂。";state.effect="学习 +13，忍耐 -22，精神下降。"}},
+{id:"mask",title:"戴口罩",desc:"仅 1 次，保命强。",available:()=>state.mask>0,run:()=>{state.mask-=1;state.study+=8;state.hp-=state.smell*.05;state.patience-=4;state.story="你戴上口罩。鼻腔暂时停火。";state.effect="学习 +8，伤害降低，口罩 -1。"}},
+{id:"window",title:"开窗",desc:"提升空气，关系小降。",available:()=>state.scene.id!=="elevator"&&!state.windowOpened,run:()=>{state.air+=30;state.smell-=24;state.patience+=5;state.relationship-=state.scene.id==="dorm"?8:5;state.windowOpened=true;state.story="你开窗。冷风进来，命也回来一点。";state.effect="空气 +30，气味 -24，关系下降。"}},
+{id:"move",title:"远离",desc:"保命，但耽误学习。",available:()=>state.scene.id!=="dorm",run:()=>{state.hp+=10;state.sanity+=8;state.study-=8;state.escape+=1;state.story="你撤到上风口。尊重流体力学。";state.effect="精神 +10，理智 +8，学习 -8。"}},
+{id:"gentle",title:"委婉提醒",desc:"长期收益，消耗勇气。",available:()=>state.courage>=14,run:()=>{const card=state.talkCard>0;if(card)state.talkCard-=1;state.smell-=28;state.courage-=18;state.relationship-=card?3:9;state.remind+=1;state.patience+=5;state.story="你委婉提醒：大家注意通风和换洗。";state.effect=card?"气味 -28，话术卡 -1，关系小降。":"气味 -28，勇气 -18，关系下降。"}},
+{id:"direct",title:"直接开怼",desc:"强效，但关系很危险。",available:()=>true,run:()=>{state.smell-=50;state.relationship-=38;state.courage-=10;state.explode+=1;state.story="你说：能不能洗澡？空气安静了，人也安静了。";state.effect="气味 -50，关系 -38，爆发 +1。"}},
+{id:"spray",title:"空气清新剂",desc:"仅 1 次，高污染反噬。",available:()=>state.spray>0,run:()=>{state.spray-=1;if(state.smell>68){state.air-=28;state.sanity-=22;state.story="清新剂失败。花香和臭味合成新物种。";state.effect="反噬：空气 -28，理智 -22。"}else{state.air+=24;state.smell-=14;state.story="清新剂短暂有效。";state.effect="空气 +24，气味 -14。"}}},
+{id:"mint",title:"薄荷糖",desc:"仅 1 次，回精神。",available:()=>state.mint>0,run:()=>{state.mint-=1;state.hp+=16;state.sanity+=14;state.story="你吃了薄荷糖。续命成功。";state.effect="精神 +16，理智 +14。"}},
+{id:"detergent",title:"洗衣液",desc:"宿舍专用，仅 1 次。",available:()=>state.scene.id==="dorm"&&state.detergent>0,run:()=>{state.detergent-=1;state.air+=20;state.smell-=42;state.clean+=8;state.story="洗衣液出场。衣物重新成为衣物。";state.effect="空气 +20，气味 -42，洁净 +8。"}},
+{id:"rule",title:"宿舍公约",desc:"宿舍可用，隐藏结局关键。",available:()=>state.scene.id==="dorm"&&!state.hasRule&&state.courage>=24,run:()=>{state.hasRule=true;state.courage-=24;state.relationship-=12;state.remind+=1;state.air+=12;state.smell-=28;state.story="你提出宿舍公约：通风、换洗、运动后处理。";state.effect="长期降低宿舍污染，关系 -12。"}},
+{id:"deepBreath",title:"离场透气",desc:"恢复强，但学习变慢。",available:()=>state.scene.id!=="elevator",run:()=>{state.hp+=18;state.sanity+=12;state.patience+=6;state.study-=10;state.escape+=1;state.story="你离场透气两分钟。灵魂重新上线。";state.effect="精神 +18，理智 +12，学习 -10。"}},
+{id:"shower",title:"自己洗澡",desc:"宿舍可用，恢复精神洁净。",available:()=>state.scene.id==="dorm",run:()=>{state.hp+=22;state.sanity+=10;state.clean+=28;state.air+=8;state.study-=8;state.story="你先去洗澡。自己先做示范。";state.effect="精神 +22，洁净 +28，学习 -8。"}},
+{id:"studyBreak",title:"闭眼缓冲",desc:"小幅回血，任何场景可用。",available:()=>true,run:()=>{state.hp+=10;state.sanity+=8;state.patience+=4;state.study-=5;state.story="你闭眼十秒，假装世界很清新。";state.effect="精神 +10，理智 +8，学习 -5。"}}];
+function startGame(){state=defaultState();show("gameScreen");newRound("第一天开始。活下去，顺便学习。")}
+function show(id){["startScreen","gameScreen","endScreen"].forEach(s=>$(s).classList.remove("active"));$(id).classList.add("active")}
+function chooseScene(){if(state.round===3)return scenes.find(s=>s.id==="dorm");return pick(scenes.filter(s=>s.id!=="dorm"))}
+function chooseCharacter(){if(state.scene.id==="dorm")return pick(characters.filter(c=>["winter","sock","perfume","study"].includes(c.id)));if(state.scene.id==="elevator")return pick(characters.filter(c=>["sport","perfume","crowded","winter"].includes(c.id)));return pick(characters)}
+function chooseEvent(){const pool=events.filter(e=>!e.sceneOnly||e.sceneOnly===state.scene.id);return Math.random()<.78?pick(pool):null}
+function newRound(prefix=""){state.windowOpened=false;state.scene=chooseScene();state.character=chooseCharacter();const ruleBonus=state.hasRule&&state.scene.id==="dorm"?-32:0;const noise=Math.floor(Math.random()*25)-8;state.smell=clamp(state.character.base*state.scene.difficulty+noise+ruleBonus,15,100);state.event=chooseEvent();let eventEffect="无额外事件";if(state.event)eventEffect=state.event.apply(state);state.story=prefix||state.scene.text;state.effect=state.event?`事件「${state.event.name}」：${state.event.text}｜${eventEffect}`:eventEffect;passiveDamage();normalize();state.currentActions=chooseFourActions();render();checkEndNow()}
+function chooseFourActions(){const available=actions.filter(a=>a.available());const recoverIds=["deepBreath","studyBreak","shower","mint"];const handleIds=["gentle","direct","window","move","detergent","rule","spray","mask"];const recoverPool=available.filter(a=>recoverIds.includes(a.id));const handlePool=available.filter(a=>handleIds.includes(a.id));const chosen=[];if(recoverPool.length>0)chosen.push(pick(recoverPool));if(handlePool.length>0){const h=pick(handlePool);if(!chosen.some(a=>a.id===h.id))chosen.push(h)}shuffle(available).forEach(a=>{if(chosen.length<ACTIONS_PER_ROUND&&!chosen.some(x=>x.id===a.id))chosen.push(a)});return chosen.slice(0,ACTIONS_PER_ROUND)}
+function passiveDamage(mult=1){state.hp-=Math.max(4,state.smell*.115*mult);state.air-=Math.max(4,state.smell*.12*mult);state.patience-=Math.max(3,state.smell*.08*mult);state.sanity-=state.smell*.04*mult;if(state.scene.id==="elevator"){state.hp-=8;state.sanity-=8}if(state.scene.id==="dorm"){state.hp-=6;state.clean-=state.hasRule?2:7;state.relationship-=state.hasRule?0:2}}
+function normalize(){["hp","air","patience","courage","relationship","study","clean","sanity","smell"].forEach(k=>{state[k]=clamp(state[k])})}
+function doAction(id){
+ const action=actions.find(a=>a.id===id);
+ if(!action||!action.available()||state.gameOver)return;
+ action.run();
+ passiveDamage(.7);
+ normalize();
+ render();
+ const fail=getFailure();
+ showResultModal(fail);
+}
+function showResultModal(failEnding=null){
+  $("resultTitle").textContent = failEnding ? "本回合结果：危险失控" : "本回合结果";
+  $("resultStory").textContent = state.story;
+  $("resultEffect").textContent = state.effect;
+  $("resultModal").classList.remove("hidden");
+  state.pendingFailure = failEnding;
+}
+function continueRound(){
+  $("resultModal").classList.add("hidden");
+  if(state.pendingFailure){
+    const ending = state.pendingFailure;
+    state.pendingFailure = null;
+    return endGame(ending);
+  }
+  nextRound();
+}
+function nextRound(){if(state.study>=100&&state.day>=5)return endGame(getSuccess());if(state.round<MAX_ROUND){state.round+=1;newRound()}else endDay()}
+function endDay(){state.day+=1;state.round=1;state.hp+=6;state.patience+=5;state.sanity+=3;state.clean-=7;state.air=Math.max(state.air,45);normalize();if(state.day>MAX_DAY)endGame(getSuccess());else newRound("新的一天。状态恢复很少，危机继续。")}
+function getFailure(){if(state.hp<=0)return{title:"精神阵亡",text:"你没被考试击倒，但被空气击倒了。"};if(state.air<=0)return{title:"生化警报",text:"空气归零。窗户和洗澡都不是摆设。"};if(state.patience<=0)return{title:"忍耐崩溃",text:"你忍到极限，场面开始不可控。"};if(state.relationship<=0)return{title:"宿舍冷战",text:"气味战赢了，人际关系没了。"};if(state.clean<=0)return{title:"你也成为传说",text:"你忘了自己也要洗澡。屠龙者终成龙。"};if(state.sanity<=0)return{title:"鼻腔飞升",text:"你闻不到了，不是赢了，是系统离线了。"};return null}
+function getSuccess(){if(state.hasRule&&state.remind>=4&&state.relationship>40)return{title:"隐藏结局：文明宿舍倡议人",text:"你用沟通和规则解决了长期问题。高级，真的高级。"};if(state.study>=100&&state.remind>=3&&state.relationship>45&&state.sanity>35)return{title:"最佳结局：清新航南",text:"你完成学习，也守住了空气。文明从一次换洗开始。"};if(state.escape>=5)return{title:"回避型生存",text:"你靠上风口活了下来。没解决问题，但很会保命。"};if(state.explode>=3)return{title:"爆发型勇士",text:"爽文路线达成，社交余震也达成。"};return{title:"普通结局：成功存活",text:"你撑过一周。建议奖励自己一口新鲜空气。"}}
+function checkEndNow(){const fail=getFailure();if(fail)endGame(fail)}
+function endGame(ending){state.gameOver=true;show("endScreen");$("endingTitle").textContent=ending.title;$("endingText").textContent=ending.text;$("endingStats").innerHTML=[["学习",state.study],["空气",state.air],["精神",state.hp],["忍耐",state.patience],["关系",state.relationship],["提醒",state.remind]].map(([k,v])=>`<div><span>${k}</span><b>${v}</b></div>`).join("")}
+function color(v){if(v<=25)return"linear-gradient(90deg,#ef4444,#f97316)";if(v<=55)return"linear-gradient(90deg,#f59e0b,#facc15)";return"linear-gradient(90deg,#5967ff,#7c3aed)"}
+function renderStats(){const list=[["空气质量",state.air],["精神值",state.hp],["忍耐值",state.patience],["学习进度",state.study],["社交勇气",state.courage],["人际关系",state.relationship],["自身洁净度",state.clean],["理智值",state.sanity]];$("stats").innerHTML=list.map(([name,value])=>`<div class="stat"><div class="stat-head"><span>${name}</span><b>${value}</b></div><div class="bar"><div class="fill" style="width:${value}%;background:${color(value)}"></div></div></div>`).join("")}
+function renderInventory(){const items=[`😷 口罩 × ${state.mask}`,`🌫️ 清新剂 × ${state.spray}`,`🍃 薄荷糖 × ${state.mint}`,`🧴 洗衣液 × ${state.detergent}`,`💬 话术卡 × ${state.talkCard}`,state.hasRule?"📜 公约：有":"📜 公约：无"];$("inventory").innerHTML=items.map(i=>`<span class="chip">${i}</span>`).join("")}
+function renderActions(){$("actions").innerHTML=state.currentActions.map(a=>`<button class="action" onclick="doAction('${a.id}')"><b>${a.title}</b><span>${a.desc}</span></button>`).join("")}
+function render(){$("dayText").textContent=`${state.day} / ${MAX_DAY}`;$("roundText").textContent=`${state.round} / ${MAX_ROUND}`;$("sceneText").textContent=state.scene.name;$("smellText").textContent=`气味强度 ${state.smell}`;$("avatarText").textContent=state.character.avatar;$("characterName").textContent=state.character.name;$("characterDesc").textContent=`${state.character.desc} ${state.character.line}`;$("eventText").textContent=state.event?`随机事件：${state.event.name}`:"普通遭遇";$("storyTitle").textContent=state.scene.name;$("storyText").textContent=state.story;$("effectText").textContent=state.effect;$("subtitle").textContent=state.air<35?"警告：空气质量红区。":"每回合只随机出现 4 个选项。";$("remindText").textContent=state.remind;$("explodeText").textContent=state.explode;$("escapeText").textContent=state.escape;$("ruleText").textContent=state.hasRule?"有":"无";renderStats();renderInventory();renderActions()}
+$("startBtn").addEventListener("click",startGame);
+$("restartBtn").addEventListener("click",startGame);
+$("againBtn").addEventListener("click",()=>show("startScreen"));
+$("continueBtn").addEventListener("click",continueRound);
+$("rulesBtn").addEventListener("click",()=>$("modal").classList.remove("hidden"));
+$("closeModal").addEventListener("click",()=>$("modal").classList.add("hidden"));
+$("modal").addEventListener("click",e=>{if(e.target.id==="modal")$("modal").classList.add("hidden")});
+</script>
 </body>
 </html>
