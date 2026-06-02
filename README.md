@@ -1,24 +1,24 @@
-# 航南生存模拟器：气味危机 V6 Clean
+# 航南生存模拟器：气味危机 V7 Render Fix
 
-这是从零重写的干净版本，不再沿用旧代码。
+这个版本用于修复 GitHub Pages 上旧 CSS 缓存导致的“页面渲染效果消失”。
 
-## 本版保证
+## 关键修复
 
-- 每回合只显示 4 个选项。
-- 4 个选项是随机抽取的，不按场景固定。
-- 第 3 回合固定宿舍，因此每天至少一次宿舍。
-- 所有道具初始数量都是 1。
-- 文案更短。
-- 每回合显示具体人物形象。
+- `index.html` 不再引用 `style.css`，而是引用 `style-v7.css?v=7`
+- `index.html` 不再引用 `script.js`，而是引用 `script-v7.js?v=7`
+- 这样浏览器不会继续使用旧缓存文件
+- 每回合仍然只随机出现 4 个可用选项
+- 每天第 3 回合固定宿舍
+- 所有道具初始数量都是 1
 
-## 文件
+## 上传方式
+
+请把 ZIP 解压后的 4 个文件全部上传到 GitHub 仓库根目录：
 
 - index.html
-- style.css
-- script.js
+- style-v7.css
+- script-v7.js
 - README.md
 
-## 上传 GitHub Pages
-
-把这 4 个文件直接放到仓库根目录，不要套文件夹。
-然后进入 Settings → Pages，选择 main / root。
+注意：可以不删除旧的 style.css 和 script.js，因为本版本已经不引用它们。
+上传后等待 1–3 分钟，再使用 Ctrl + F5 强制刷新网页。
