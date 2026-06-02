@@ -1,42 +1,20 @@
-# 航南生存模拟器：气味危机
+# 航南生存模拟器：气味危机 v2
 
-一个纯前端静态点击小游戏，可直接部署到 GitHub Pages。
+更新内容：
 
-## 文件结构
+1. 每天第 3 回合固定进入宿舍，保证每天至少有一段宿舍场景。
+2. 所有道具初始数量改为 1。
+3. 增强负面状态影响，更容易死亡。
+4. 文案压缩，更适合快节奏点击。
+5. 从“大场景”改为“具体人物画像”，每回合出现一个气味角色。
 
-```text
-hangnan_survival_simulator/
-├── index.html
-├── style.css
-├── script.js
-└── README.md
-```
+## 部署
 
-## 本地运行
+将以下文件上传到 GitHub 仓库根目录：
 
-直接双击 `index.html` 即可打开。
+- index.html
+- style.css
+- script.js
+- README.md
 
-## 部署到 GitHub Pages
-
-1. 新建一个 GitHub 仓库，例如 `hangnan-survival-simulator`
-2. 上传这四个文件到仓库根目录
-3. 进入仓库 `Settings`
-4. 找到 `Pages`
-5. Source 选择 `Deploy from a branch`
-6. Branch 选择 `main`，目录选择 `/root`
-7. 保存后等待一会儿，GitHub 会生成网址
-
-## 修改玩法
-
-主要改 `script.js`：
-
-- `scenes`：场景
-- `smellSources`：气味源类型
-- `randomEvents`：随机事件
-- `actions`：按钮行动
-- `getSuccessEnding()`：成功结局
-- `getFailureEnding()`：失败结局
-
-## 表达说明
-
-本游戏吐槽的是忽视公共空间卫生的行为，不针对任何现实个人或群体。
+然后在 Settings → Pages 中选择 main / root。

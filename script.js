@@ -5,96 +5,91 @@ const scenes = [
   {
     id: "classroom",
     name: "航南教室",
-    emoji: "📚",
-    difficulty: 1.0,
-    intro: "你走进教室，黑板还没擦，窗户却关得像保险柜。空气里有一种沉重的历史感。"
+    difficulty: 1.15,
+    text: "教室门一开，空气先给你来了个下马威。"
   },
   {
     id: "elevator",
     name: "电梯",
-    emoji: "🛗",
-    difficulty: 1.35,
-    intro: "电梯门缓缓合上。你意识到，这不是交通工具，这是一个随机匹配的密闭副本。"
+    difficulty: 1.55,
+    text: "电梯门合上，副本开始。"
   },
   {
     id: "dorm",
     name: "宿舍",
-    emoji: "🛏️",
-    difficulty: 1.25,
-    intro: "你回到宿舍。桌面很安静，地面很安静，只有角落里的袜子像在进行生命活动。"
+    difficulty: 1.65,
+    text: "你回到宿舍。真正的每日 Boss 刷新了。"
   },
   {
     id: "canteen",
     name: "食堂",
-    emoji: "🍜",
-    difficulty: 0.9,
-    intro: "你端着饭寻找座位。饭香、人群和不可名状的气味在空气里开会。"
+    difficulty: 1.0,
+    text: "饭香和奇怪气味同时入场。"
   },
   {
     id: "library",
     name: "自习区",
-    emoji: "📖",
-    difficulty: 0.95,
-    intro: "你来到自习区。这里安静得连翻书声都很谨慎，但气味并不遵守图书馆纪律。"
+    difficulty: 1.1,
+    text: "自习区很安静，但气味不守规矩。"
   },
   {
     id: "groupMeeting",
     name: "小组讨论",
-    emoji: "🧑‍💻",
-    difficulty: 1.15,
-    intro: "小组围坐讨论展示。PPT 还没打开，空气已经开始做开题报告。"
-  },
-  {
-    id: "corridor",
-    name: "走廊",
-    emoji: "🚪",
-    difficulty: 0.75,
-    intro: "走廊有风，这是今日份稀有资源。你短暂地相信世界仍有救。"
+    difficulty: 1.3,
+    text: "PPT 还没打开，空气已经开题。"
   }
 ];
 
-const smellSources = [
+const dormScene = scenes.find(s => s.id === "dorm");
+
+const characters = [
   {
     id: "winterType",
     name: "冬眠型选手",
-    base: 45,
-    text: "有人坚信冬天不会出汗，所以洗澡可以进入低频维护模式。"
+    avatar: "🧥",
+    base: 55,
+    desc: "厚外套、乱头发，坚信冬天不出汗。",
+    line: "“冬天不用天天洗吧？”"
   },
   {
     id: "sportType",
     name: "运动直达型",
-    base: 70,
-    text: "刚运动完的气息未经任何处理，直接抵达公共空间。"
+    avatar: "🏀",
+    base: 82,
+    desc: "球鞋、短袖、汗味未冷却，刚下球场直达室内。",
+    line: "“我就坐一会儿。”"
   },
   {
     id: "sockWizard",
     name: "袜子炼金术士",
-    base: 80,
-    text: "某双袜子似乎已经不属于纺织品，而属于实验样本。"
+    avatar: "🧦",
+    base: 92,
+    desc: "床边有神秘袜团，疑似正在培养文明。",
+    line: "“别动，我还要穿。”"
   },
   {
     id: "perfumeCover",
     name: "香水掩盖派",
-    base: 60,
-    text: "香水试图力挽狂澜，但它面对的是一整套复杂生态系统。"
+    avatar: "🧴",
+    base: 72,
+    desc: "香水喷得很努力，但底味更努力。",
+    line: "“我喷香水了啊。”"
   },
   {
     id: "researchType",
     name: "沉浸学习型",
-    base: 55,
-    text: "有人认为洗澡会打断思路，显然他的思路很坚固。"
+    avatar: "💻",
+    base: 66,
+    desc: "电脑不关，人不洗漱，灵感和气味都在持续输出。",
+    line: "“洗澡会打断思路。”"
   },
   {
     id: "crowdedType",
     name: "密闭叠加型",
-    base: 90,
-    text: "空间小、人数多、空气流动弱，三者合体打出了组合技。"
-  },
-  {
-    id: "normalType",
-    name: "普通闷热型",
-    base: 25,
-    text: "倒也没有特别严重，只是空气有点不想上班。"
+    avatar: "🧍‍♂️",
+    base: 96,
+    desc: "不是一个人，是一群人。空气直接进入困难模式。",
+    line: "“挤一挤就到了。”"
   }
 ];
 
@@ -102,85 +97,72 @@ const randomEvents = [
   {
     id: "closedRoom",
     name: "门窗紧闭",
-    text: "门窗紧闭，空气开始循环播放自己。",
+    text: "窗户关死了。",
     effect: s => {
-      s.air -= 12;
-      s.smellLevel += 10;
-      return "空气质量 -12，气味强度 +10";
+      s.air -= 18;
+      s.smellLevel += 16;
+      return "空气 -18，气味 +16";
     }
   },
   {
     id: "afterSport",
-    name: "体育课刚下课",
-    text: "一批刚运动完的同学进入场景，空气忽然有了肌肉记忆。",
+    name: "运动后入场",
+    text: "汗味增援抵达。",
     effect: s => {
-      s.smellLevel += 22;
-      s.patience -= 5;
-      return "气味强度 +22，忍耐值 -5";
+      s.smellLevel += 30;
+      s.patience -= 10;
+      return "气味 +30，忍耐 -10";
     }
   },
   {
     id: "sockCritical",
     name: "袜子暴击",
-    text: "角落里的一双袜子完成了从衣物到地貌的进化。",
+    text: "袜子完成进化。",
     effect: s => {
-      s.smellLevel += 30;
-      s.sanity -= 12;
-      return "气味强度 +30，理智值 -12";
+      s.smellLevel += 42;
+      s.sanity -= 20;
+      return "气味 +42，理智 -20";
     },
     sceneOnly: "dorm"
   },
   {
     id: "campusWind",
     name: "北航大风",
-    text: "一阵风穿过走廊。它很冷，但它正义。",
+    text: "风来了，正义来了。",
     effect: s => {
-      s.air += 25;
-      s.smellLevel -= 15;
-      return "空气质量 +25，气味强度 -15";
+      s.air += 22;
+      s.smellLevel -= 18;
+      return "空气 +22，气味 -18";
     }
-  },
-  {
-    id: "roomCheck",
-    name: "卫生检查传闻",
-    text: "据说要查卫生，公共区域突然出现了短暂文明。",
-    effect: s => {
-      s.air += 18;
-      s.relationship += 4;
-      s.smellLevel -= 12;
-      return "空气质量 +18，关系 +4，气味强度 -12";
-    },
-    sceneOnly: "dorm"
   },
   {
     id: "deadline",
     name: "DDL 压顶",
-    text: "小组作业 DDL 逼近，你决定暂时把鼻子交给命运。",
+    text: "你被迫硬学。",
     effect: s => {
-      s.study += 18;
-      s.hp -= 8;
-      return "学习进度 +18，精神值 -8";
+      s.study += 16;
+      s.hp -= 16;
+      return "学习 +16，精神 -16";
     }
   },
   {
     id: "powerOff",
     name: "突然停电",
-    text: "灯灭的一瞬间，空气仿佛也开始放飞自我。",
+    text: "黑暗放大了一切。",
     effect: s => {
-      s.sanity -= 8;
-      s.air -= 8;
-      return "理智值 -8，空气质量 -8";
+      s.sanity -= 16;
+      s.air -= 12;
+      return "理智 -16，空气 -12";
     }
   },
   {
     id: "miracleBath",
     name: "奇迹洗澡",
-    text: "有人主动洗澡并更换衣物。你短暂地看见了文明的曙光。",
+    text: "有人洗澡了。",
     effect: s => {
-      s.smellLevel -= 40;
+      s.smellLevel -= 45;
       s.relationship += 8;
-      s.patience += 8;
-      return "气味强度 -40，关系 +8，忍耐值 +8";
+      return "气味 -45，关系 +8";
     }
   }
 ];
@@ -201,30 +183,33 @@ function getDefaultState() {
   return {
     day: 1,
     round: 1,
+
     hp: 100,
     air: 100,
-    patience: 80,
-    courage: 52,
-    relationship: 82,
+    patience: 72,
+    courage: 50,
+    relationship: 78,
     study: 0,
-    cleanliness: 100,
-    sanity: 100,
-    smellLevel: 50,
+    cleanliness: 92,
+    sanity: 88,
+
+    smellLevel: 65,
     scene: scenes[0],
-    source: smellSources[0],
+    character: characters[0],
     event: null,
-    hasMask: true,
-    maskUses: 4,
-    hasSpray: true,
-    sprayUses: 3,
-    mint: 2,
+
+    maskUses: 1,
+    sprayUses: 1,
+    mint: 1,
     detergent: 1,
     talkCard: 1,
+
     hasRule: false,
     remindCount: 0,
     explodeCount: 0,
     escapeCount: 0,
     windowOpened: false,
+
     message: "",
     effect: "",
     gameOver: false
@@ -236,33 +221,34 @@ function startGame() {
   $("startScreen").classList.remove("active");
   $("endScreen").classList.remove("active");
   $("gameScreen").classList.add("active");
-  newEncounter("欢迎来到航南生存挑战。今天的目标：完成任务，并保住鼻子的尊严。");
+  newEncounter("第一天开始。活下去，顺便学习。");
 }
 
-function restartGame() {
-  startGame();
+function chooseScene() {
+  if (state.round === 3) return dormScene;
+  return pick(scenes.filter(s => s.id !== "dorm"));
 }
 
 function newEncounter(prefix = "") {
   state.windowOpened = false;
-  state.scene = pick(scenes);
-  state.source = pick(smellSources);
+  state.scene = chooseScene();
+  state.character = state.scene.id === "dorm"
+    ? pick(characters.filter(c => ["sockWizard", "winterType", "researchType", "perfumeCover"].includes(c.id)))
+    : pick(characters);
 
-  const base = state.source.base * state.scene.difficulty;
-  const randomNoise = Math.floor(Math.random() * 21) - 10;
-  const ruleBonus = state.hasRule && state.scene.id === "dorm" ? -25 : 0;
-  state.smellLevel = clamp(base + randomNoise + ruleBonus, 5, 100);
+  const base = state.character.base * state.scene.difficulty;
+  const noise = Math.floor(Math.random() * 25) - 8;
+  const ruleBonus = state.hasRule && state.scene.id === "dorm" ? -32 : 0;
+  state.smellLevel = clamp(base + noise + ruleBonus, 15, 100);
 
   const validEvents = randomEvents.filter(e => !e.sceneOnly || e.sceneOnly === state.scene.id);
-  state.event = Math.random() < 0.72 ? pick(validEvents) : null;
+  state.event = Math.random() < 0.78 ? pick(validEvents) : null;
 
-  let eventEffect = "";
-  if (state.event) {
-    eventEffect = state.event.effect(state);
-  }
+  let eventEffect = "无额外事件";
+  if (state.event) eventEffect = state.event.effect(state);
 
-  state.message = prefix || `${state.scene.intro} ${state.source.text}`;
-  state.effect = state.event ? `随机事件「${state.event.name}」：${state.event.text}｜${eventEffect}` : "本回合没有额外随机事件。空气保持表面平静。";
+  state.message = prefix || state.scene.text;
+  state.effect = state.event ? `事件「${state.event.name}」：${state.event.text}｜${eventEffect}` : eventEffect;
 
   applyPassiveDamage();
   normalizeState();
@@ -271,20 +257,24 @@ function newEncounter(prefix = "") {
 }
 
 function applyPassiveDamage(multiplier = 1) {
-  const damage = Math.max(2, state.smellLevel * 0.08 * multiplier);
-  const airLoss = Math.max(2, state.smellLevel * 0.06 * multiplier);
+  const hpLoss = Math.max(5, state.smellLevel * 0.13 * multiplier);
+  const airLoss = Math.max(4, state.smellLevel * 0.12 * multiplier);
+  const patienceLoss = Math.max(3, state.smellLevel * 0.08 * multiplier);
 
-  state.hp -= damage;
+  state.hp -= hpLoss;
   state.air -= airLoss;
-  state.patience -= state.smellLevel * 0.035 * multiplier;
+  state.patience -= patienceLoss;
+  state.sanity -= state.smellLevel * 0.045 * multiplier;
 
   if (state.scene.id === "elevator") {
-    state.hp -= 4;
-    state.sanity -= 3;
+    state.hp -= 8;
+    state.sanity -= 8;
   }
 
-  if (state.scene.id === "dorm" && !state.hasRule) {
-    state.cleanliness -= 2;
+  if (state.scene.id === "dorm") {
+    state.hp -= 6;
+    state.cleanliness -= state.hasRule ? 2 : 7;
+    state.relationship -= state.hasRule ? 0 : 2;
   }
 }
 
@@ -298,155 +288,156 @@ const actions = [
   {
     id: "endure",
     title: "忍了",
-    desc: "学习推进，但精神与忍耐下降。",
+    desc: "学习快，但掉状态很疼。",
     available: () => true,
     run: () => {
-      state.study += 12;
-      state.patience -= 14;
-      state.hp -= state.smellLevel * 0.16;
-      state.sanity -= 6;
-      state.message = "你选择了沉默。知识进入了大脑，气味也进入了灵魂。";
-      state.effect = "学习进度 +12，忍耐值 -14，精神值受气味影响下降。";
+      state.study += 13;
+      state.patience -= 22;
+      state.hp -= state.smellLevel * 0.22;
+      state.sanity -= 12;
+      state.message = "你忍了。知识进脑，气味入魂。";
+      state.effect = "学习 +13，忍耐 -22，精神和理智下降。";
     }
   },
   {
     id: "mask",
     title: "戴口罩",
-    desc: "减少伤害，消耗一次口罩耐久。",
-    available: () => state.hasMask && state.maskUses > 0,
+    desc: "仅 1 次，保命强。",
+    available: () => state.maskUses > 0,
     run: () => {
       state.maskUses -= 1;
-      state.study += 9;
-      state.hp -= state.smellLevel * 0.06;
-      state.patience -= 3;
-      state.courage -= 2;
-      state.message = "你戴上口罩。这是理智与鼻腔达成的停火协议。";
-      state.effect = "学习进度 +9，气味伤害大幅降低，口罩耐久 -1。";
+      state.study += 8;
+      state.hp -= state.smellLevel * 0.05;
+      state.patience -= 4;
+      state.message = "你戴上口罩。鼻腔暂时停火。";
+      state.effect = "学习 +8，伤害大幅降低，口罩 -1。";
     }
   },
   {
     id: "window",
-    title: "开窗通风",
-    desc: "提升空气，可能轻微影响关系。",
+    title: "开窗",
+    desc: "不能在电梯用。",
     available: () => state.scene.id !== "elevator" && !state.windowOpened,
     run: () => {
-      state.air += 28;
-      state.smellLevel -= 20;
-      state.patience += 6;
-      state.relationship -= state.scene.id === "library" ? 8 : 4;
+      state.air += 30;
+      state.smellLevel -= 24;
+      state.patience += 5;
+      state.relationship -= state.scene.id === "dorm" ? 8 : 5;
       state.windowOpened = true;
-      state.message = "你打开窗户。风冲进来了，带着一点冷，但至少是活的。";
-      state.effect = "空气质量 +28，气味强度 -20，关系小幅下降。";
+      state.message = "你开窗。冷风进来，命也回来一点。";
+      state.effect = "空气 +30，气味 -24，关系小降。";
     }
   },
   {
     id: "move",
-    title: "换座 / 远离",
-    desc: "保命优先，但耽误任务。",
+    title: "远离",
+    desc: "保命，但耽误学习。",
     available: () => state.scene.id !== "dorm",
     run: () => {
-      state.hp += 8;
-      state.sanity += 5;
-      state.study -= 4;
+      state.hp += 10;
+      state.sanity += 8;
+      state.study -= 8;
       state.escapeCount += 1;
-      state.message = "你迅速移动到上风口。你不是逃兵，你只是尊重流体力学。";
-      state.effect = "精神值 +8，理智值 +5，学习进度 -4，逃离次数 +1。";
+      state.message = "你撤到上风口。尊重流体力学。";
+      state.effect = "精神 +10，理智 +8，学习 -8，逃离 +1。";
     }
   },
   {
     id: "gentle",
     title: "委婉提醒",
-    desc: "长期收益高，消耗勇气。",
-    available: () => state.courage >= 12,
+    desc: "稳，但需要勇气。",
+    available: () => state.courage >= 14,
     run: () => {
       const hasCard = state.talkCard > 0;
       if (hasCard) state.talkCard -= 1;
-      state.smellLevel -= 24;
-      state.courage -= 14;
-      state.relationship -= hasCard ? 2 : 6;
+
+      state.smellLevel -= 28;
+      state.courage -= 18;
+      state.relationship -= hasCard ? 3 : 9;
       state.remindCount += 1;
       state.patience += 5;
-      state.message = "你说：“最近大家运动和学习都挺累的，要不我们注意一下通风和换洗？”这句话绕了三圈，终于落在卫生问题上。";
-      state.effect = `气味强度 -24，勇气 -14，提醒次数 +1${hasCard ? "，委婉话术卡抵消了大部分关系损失。" : "。"}`;
+
+      state.message = "你委婉提醒：要不大家注意通风和换洗？";
+      state.effect = `气味 -28，勇气 -18，提醒 +1${hasCard ? "，话术卡抵消关系损失。" : "。"}`;
     }
   },
   {
     id: "direct",
     title: "直接开怼",
-    desc: "短期强力，但关系掉得快。",
+    desc: "强效，但危险。",
     available: () => true,
     run: () => {
-      state.smellLevel -= 42;
-      state.relationship -= 30;
-      state.courage -= 8;
+      state.smellLevel -= 50;
+      state.relationship -= 38;
+      state.courage -= 10;
       state.explodeCount += 1;
-      state.message = "你终于说出了那句：“能不能注意一下个人卫生？”空气安静了，人际关系也安静了。";
-      state.effect = "气味强度 -42，关系 -30，爆发次数 +1。爽是爽了，但后劲不小。";
+      state.message = "你说：能不能洗澡？空气安静了，人也安静了。";
+      state.effect = "气味 -50，关系 -38，爆发 +1。";
     }
   },
   {
     id: "spray",
-    title: "空气清新剂",
-    desc: "低污染有效，高污染反噬。",
-    available: () => state.hasSpray && state.sprayUses > 0,
+    title: "清新剂",
+    desc: "仅 1 次，高污染反噬。",
+    available: () => state.sprayUses > 0,
     run: () => {
       state.sprayUses -= 1;
-      if (state.smellLevel > 70) {
-        state.air -= 22;
-        state.sanity -= 14;
-        state.message = "你使用了空气清新剂。系统提示：不要把玫瑰种在沼气池上。";
-        state.effect = "触发「香臭混合态」：空气质量 -22，理智值 -14，清新剂 -1。";
+      if (state.smellLevel > 68) {
+        state.air -= 28;
+        state.sanity -= 22;
+        state.message = "清新剂失败。花香和臭味合成新物种。";
+        state.effect = "触发反噬：空气 -28，理智 -22。";
         $("sceneVisual").classList.add("shake");
         setTimeout(() => $("sceneVisual").classList.remove("shake"), 350);
       } else {
-        state.air += 22;
-        state.smellLevel -= 10;
-        state.message = "你使用了空气清新剂。它短暂地证明，科技仍然值得相信。";
-        state.effect = "空气质量 +22，气味强度 -10，清新剂 -1。";
+        state.air += 24;
+        state.smellLevel -= 14;
+        state.message = "清新剂短暂有效。";
+        state.effect = "空气 +24，气味 -14，清新剂 -1。";
       }
     }
   },
   {
     id: "mint",
-    title: "薄荷糖续命",
-    desc: "恢复精神和理智。",
+    title: "薄荷糖",
+    desc: "仅 1 次，回精神。",
     available: () => state.mint > 0,
     run: () => {
       state.mint -= 1;
-      state.hp += 14;
-      state.sanity += 12;
-      state.message = "你含下一颗薄荷糖。鼻腔没有完全胜利，但至少签了临时停战协议。";
-      state.effect = "精神值 +14，理智值 +12，薄荷糖 -1。";
+      state.hp += 16;
+      state.sanity += 14;
+      state.message = "你吃了薄荷糖。续命成功。";
+      state.effect = "精神 +16，理智 +14，薄荷糖 -1。";
     }
   },
   {
     id: "detergent",
-    title: "洗衣液净化",
-    desc: "宿舍特攻，减少长期污染。",
+    title: "洗衣液",
+    desc: "宿舍专用，仅 1 次。",
     available: () => state.scene.id === "dorm" && state.detergent > 0,
     run: () => {
       state.detergent -= 1;
-      state.air += 18;
-      state.smellLevel -= 34;
-      state.cleanliness += 6;
-      state.message = "你掏出洗衣液。某些衣物终于从考古文物回到了日用品身份。";
-      state.effect = "空气质量 +18，气味强度 -34，自身洁净度 +6，洗衣液 -1。";
+      state.air += 20;
+      state.smellLevel -= 42;
+      state.cleanliness += 8;
+      state.message = "洗衣液出场。衣物重新成为衣物。";
+      state.effect = "空气 +20，气味 -42，洁净 +8。";
     }
   },
   {
     id: "rule",
-    title: "制定宿舍公约",
-    desc: "隐藏好结局关键。",
-    available: () => state.scene.id === "dorm" && !state.hasRule && state.courage >= 25,
+    title: "宿舍公约",
+    desc: "隐藏结局关键。",
+    available: () => state.scene.id === "dorm" && !state.hasRule && state.courage >= 24,
     run: () => {
       state.hasRule = true;
-      state.courage -= 22;
-      state.relationship -= 8;
+      state.courage -= 24;
+      state.relationship -= 12;
       state.remindCount += 1;
-      state.air += 10;
-      state.smellLevel -= 22;
-      state.message = "你提出宿舍卫生公约：通风、换洗、运动后及时处理。规则一出，空气第一次有了制度保障。";
-      state.effect = "建立长期机制：之后宿舍气味生成降低。勇气 -22，关系 -8，提醒次数 +1。";
+      state.air += 12;
+      state.smellLevel -= 28;
+      state.message = "你提出宿舍公约：通风、换洗、运动后及时处理。";
+      state.effect = "长期降低宿舍污染。勇气 -24，关系 -12。";
     }
   }
 ];
@@ -457,7 +448,7 @@ function doAction(actionId) {
   if (!action || !action.available()) return;
 
   action.run();
-  applyPassiveDamage(0.55);
+  applyPassiveDamage(0.7);
   normalizeState();
   render();
 
@@ -467,7 +458,7 @@ function doAction(actionId) {
     return;
   }
 
-  setTimeout(nextTurn, 520);
+  setTimeout(nextTurn, 420);
 }
 
 function nextTurn() {
@@ -489,96 +480,45 @@ function nextTurn() {
 function endDay() {
   state.day += 1;
   state.round = 1;
-  state.hp += 10;
-  state.patience += 8;
-  state.sanity += 5;
-  state.cleanliness -= 4;
-  state.air = Math.max(state.air, 52);
+  state.hp += 6;
+  state.patience += 5;
+  state.sanity += 3;
+  state.cleanliness -= 7;
+  state.air = Math.max(state.air, 45);
 
   normalizeState();
 
   if (state.day > MAX_DAY) {
     endGame(getSuccessEnding());
   } else {
-    newEncounter(`你撑过了一天。睡眠恢复了一点精神，但洁净度也在提醒你：公共卫生从自己开始。`);
+    newEncounter("新的一天。状态恢复很少，危机继续。");
   }
 }
 
 function getFailureEnding() {
-  if (state.hp <= 0) {
-    return {
-      title: "精神阵亡",
-      text: "你完成了部分任务，但鼻腔和灵魂都表示需要休庭。公共空间卫生不是小事，它会真实消耗每个人的精力。"
-    };
-  }
-  if (state.air <= 0) {
-    return {
-      title: "生化警报",
-      text: "空气质量归零。你终于理解，窗户不是装饰品，通风也不是玄学。"
-    };
-  }
-  if (state.patience <= 0) {
-    return {
-      title: "忍耐崩溃",
-      text: "你忍到最后，终于喊出了心里话。问题也许解决了一点，但场面一度非常安静。"
-    };
-  }
-  if (state.relationship <= 0) {
-    return {
-      title: "宿舍冷战",
-      text: "你赢下了气味战争的一小局，却输掉了人际关系的大地图。下次也许需要更聪明的话术。"
-    };
-  }
-  if (state.cleanliness <= 0) {
-    return {
-      title: "你也成为传说",
-      text: "你一直在嫌弃别人，却忘了自己也需要洗澡和换衣服。屠龙者终成龙，太抽象了。"
-    };
-  }
-  if (state.sanity <= 0) {
-    return {
-      title: "鼻腔飞升",
-      text: "你已经闻不到味道了。不是空气变好了，是你的感知系统选择了离线。"
-    };
-  }
+  if (state.hp <= 0) return { title: "精神阵亡", text: "你没被考试击倒，但被空气击倒了。" };
+  if (state.air <= 0) return { title: "生化警报", text: "空气归零。窗户和洗澡都不是摆设。" };
+  if (state.patience <= 0) return { title: "忍耐崩溃", text: "你忍到极限，场面开始不可控。" };
+  if (state.relationship <= 0) return { title: "宿舍冷战", text: "气味战赢了，人际关系没了。" };
+  if (state.cleanliness <= 0) return { title: "你也成为传说", text: "你忘了自己也要洗澡。屠龙者终成龙。" };
+  if (state.sanity <= 0) return { title: "鼻腔飞升", text: "你闻不到了，不是赢了，是系统离线了。" };
   return null;
 }
 
 function getSuccessEnding() {
-  if (state.hasRule && state.remindCount >= 4 && state.relationship > 45) {
-    return {
-      title: "隐藏结局：文明宿舍倡议人",
-      text: "你没有只靠愤怒解决问题，而是用沟通和规则降低了长期污染。一个人的清洁习惯，也可以被制度设计轻轻推一把。"
-    };
+  if (state.hasRule && state.remindCount >= 4 && state.relationship > 40) {
+    return { title: "隐藏结局：文明宿舍倡议人", text: "你用沟通和规则解决了长期问题。高级，真的高级。" };
   }
-  if (state.study >= 100 && state.remindCount >= 3 && state.relationship > 50 && state.sanity > 45) {
-    return {
-      title: "最佳结局：清新航南",
-      text: "你完成了学习任务，也守住了空气质量。你证明了：公共空间的文明，可以从一次开窗、一次提醒、一次换洗开始。"
-    };
+  if (state.study >= 100 && state.remindCount >= 3 && state.relationship > 45 && state.sanity > 35) {
+    return { title: "最佳结局：清新航南", text: "你完成学习，也守住了空气。文明从一次换洗开始。" };
   }
   if (state.escapeCount >= 5) {
-    return {
-      title: "回避型生存",
-      text: "你凭借对上风口和逃生路线的精准把握活了下来。严格来说，这不是解决问题，但确实很会保命。"
-    };
+    return { title: "回避型生存", text: "你靠上风口活了下来。没解决问题，但很会保命。" };
   }
   if (state.explodeCount >= 3) {
-    return {
-      title: "爆发型勇士",
-      text: "你多次正面开怼，短期效果显著，社交余震也很显著。爽文路线达成。"
-    };
+    return { title: "爆发型勇士", text: "爽文路线达成，社交余震也达成。" };
   }
-  if (state.sanity < 45) {
-    return {
-      title: "麻木适应",
-      text: "你完成了一周生存，但已经对空气质量不再抱有世俗欲望。恭喜通关，也建议休息。"
-    };
-  }
-  return {
-    title: "普通结局：成功存活",
-    text: "你撑过了一周。虽然没有彻底改变环境，但你学会了口罩、通风、沟通和撤退的组合技。"
-  };
+  return { title: "普通结局：成功存活", text: "你撑过一周。建议奖励自己一口新鲜空气。" };
 }
 
 function checkImmediateEnd() {
@@ -593,12 +533,12 @@ function endGame(ending) {
   $("endingTitle").textContent = ending.title;
   $("endingText").textContent = ending.text;
   $("endingStats").innerHTML = `
-    <div><span>学习进度</span><strong>${state.study}</strong></div>
-    <div><span>空气质量</span><strong>${state.air}</strong></div>
-    <div><span>精神值</span><strong>${state.hp}</strong></div>
-    <div><span>忍耐值</span><strong>${state.patience}</strong></div>
-    <div><span>人际关系</span><strong>${state.relationship}</strong></div>
-    <div><span>提醒次数</span><strong>${state.remindCount}</strong></div>
+    <div><span>学习</span><strong>${state.study}</strong></div>
+    <div><span>空气</span><strong>${state.air}</strong></div>
+    <div><span>精神</span><strong>${state.hp}</strong></div>
+    <div><span>忍耐</span><strong>${state.patience}</strong></div>
+    <div><span>关系</span><strong>${state.relationship}</strong></div>
+    <div><span>提醒</span><strong>${state.remindCount}</strong></div>
   `;
 }
 
@@ -635,7 +575,7 @@ function renderInventory() {
     `🍃 薄荷糖 × ${state.mint}`,
     `🧴 洗衣液 × ${state.detergent}`,
     `💬 话术卡 × ${state.talkCard}`,
-    state.hasRule ? "📜 宿舍公约 已建立" : "📜 宿舍公约 未建立"
+    state.hasRule ? "📜 公约：有" : "📜 公约：无"
   ];
 
   $("inventory").innerHTML = `<div class="inventory">${items.map(i => `<span class="item">${i}</span>`).join("")}</div>`;
@@ -658,12 +598,16 @@ function render() {
   $("roundNum").textContent = state.round;
   $("sceneName").textContent = state.scene.name;
   $("smellBadge").textContent = `气味强度 ${state.smellLevel}`;
-  $("airEmoji").textContent = state.scene.emoji;
-  $("eventLabel").textContent = state.event ? `随机事件：${state.event.name}` : "普通遭遇";
-  $("storyTitle").textContent = `${state.scene.name}｜${state.source.name}`;
-  $("storyText").textContent = `${state.message} ${state.source.text}`;
+
+  $("avatar").textContent = state.character.avatar;
+  $("characterName").textContent = state.character.name;
+  $("characterDesc").textContent = `${state.character.desc} ${state.character.line}`;
+
+  $("eventLabel").textContent = state.event ? `事件：${state.event.name}` : "普通遭遇";
+  $("storyTitle").textContent = `${state.scene.name}`;
+  $("storyText").textContent = state.message;
   $("effectText").textContent = state.effect;
-  $("subtitle").textContent = state.air < 35 ? "警告：空气质量进入红区。" : "公共空间卫生外部性观察中……";
+  $("subtitle").textContent = state.air < 35 ? "警告：空气质量红区。" : "硬核模式：请谨慎选择。";
 
   $("remindCount").textContent = state.remindCount;
   $("explodeCount").textContent = state.explodeCount;

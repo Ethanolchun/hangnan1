@@ -3,41 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>航南生存模拟器：气味危机</title>
+  <title>航南生存模拟器：气味危机 v2</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="bg-orb orb-1"></div>
-  <div class="bg-orb orb-2"></div>
-  <div class="bg-orb orb-3"></div>
-
   <main id="app">
     <section id="startScreen" class="screen active">
       <div class="hero-card">
-        <div class="tag">Campus Survival Mini Game</div>
+        <div class="tag">Hard Mode · v2</div>
         <h1>航南生存模拟器</h1>
         <h2>气味危机</h2>
         <p class="intro">
-          你将扮演一名普通学生，在教室、宿舍、电梯、自习区与小组讨论之间完成一周生存挑战。
-          注意：本游戏吐槽的是<strong>忽视公共卫生的行为</strong>，不针对任何现实个人或群体。
+          七天生存挑战。每天 3 回合，<strong>第 3 回合固定回宿舍</strong>。
+          道具仅 1 次，负面效果增强，更容易翻车。
         </p>
-
         <div class="mini-rules">
-          <div>
-            <span>🎯 目标</span>
-            <p>保持精神值与空气质量，完成学习进度，撑过 7 天。</p>
-          </div>
-          <div>
-            <span>🧼 核心</span>
-            <p>沟通、通风、制度建设，比单纯硬刚更稳。</p>
-          </div>
-          <div>
-            <span>⚠️ 风险</span>
-            <p>香水不一定能救场，有时会触发“香臭混合态”。</p>
-          </div>
+          <div><b>🎯 目标</b><p>完成学习进度，同时保住空气、精神和关系。</p></div>
+          <div><b>🛏️ 宿舍</b><p>每天必刷宿舍场景，长期污染会叠加。</p></div>
+          <div><b>👤 人物</b><p>每回合出现具体人物画像，不再只是大场景。</p></div>
         </div>
-
-        <button id="startBtn" class="primary-btn">开始生存</button>
+        <button id="startBtn" class="primary-btn">开始硬核生存</button>
       </div>
     </section>
 
@@ -54,55 +39,45 @@
       </header>
 
       <section class="dashboard">
-        <div class="day-card">
-          <span>第</span>
-          <strong id="dayNum">1</strong>
-          <span>天</span>
-        </div>
-        <div class="day-card">
-          <span>回合</span>
-          <strong id="roundNum">1</strong>
-          <span>/ 3</span>
-        </div>
-        <div class="day-card scene-card">
-          <span>当前场景</span>
-          <strong id="sceneName">航南教室</strong>
-        </div>
+        <div class="day-card"><span>第</span><strong id="dayNum">1</strong><span>天</span></div>
+        <div class="day-card"><span>回合</span><strong id="roundNum">1</strong><span>/ 3</span></div>
+        <div class="day-card scene-card"><span>当前场景</span><strong id="sceneName">航南教室</strong></div>
       </section>
 
       <section class="layout">
         <aside class="stats-panel">
-          <h3>状态面板</h3>
+          <h3>状态</h3>
           <div id="stats"></div>
 
-          <h3>背包</h3>
+          <h3>背包：每局仅 1 次</h3>
           <div id="inventory"></div>
 
-          <h3>隐藏记录</h3>
+          <h3>记录</h3>
           <div class="record-grid">
             <div>委婉提醒 <strong id="remindCount">0</strong></div>
             <div>爆发次数 <strong id="explodeCount">0</strong></div>
             <div>逃离次数 <strong id="escapeCount">0</strong></div>
-            <div>制度建设 <strong id="ruleState">无</strong></div>
+            <div>宿舍公约 <strong id="ruleState">无</strong></div>
           </div>
         </aside>
 
         <section class="story-panel">
           <div class="scene-visual" id="sceneVisual">
             <div class="warning-badge" id="smellBadge">气味强度 50</div>
-            <div class="air-ring">
-              <div class="ring-inner">
-                <span id="airEmoji">🌬️</span>
+
+            <div class="character-card">
+              <div class="avatar" id="avatar">🧍</div>
+              <div>
+                <h2 id="characterName">人物</h2>
+                <p id="characterDesc">人物描述</p>
               </div>
             </div>
           </div>
 
           <article class="story-card">
-            <div class="event-label" id="eventLabel">随机事件</div>
-            <h2 id="storyTitle">你推开了一扇门</h2>
-            <p id="storyText">
-              一股无法被高等教育解释的气味扑面而来。你的理智告诉你：这是公共卫生问题。你的鼻子告诉你：快跑。
-            </p>
+            <div class="event-label" id="eventLabel">普通遭遇</div>
+            <h2 id="storyTitle">场景标题</h2>
+            <p id="storyText">场景描述</p>
             <p id="effectText" class="effect-text"></p>
           </article>
 
@@ -125,18 +100,13 @@
   <div id="modal" class="modal hidden">
     <div class="modal-card">
       <button id="closeModal" class="close-btn">×</button>
-      <h2>游戏规则</h2>
-      <p>
-        每天 3 回合，共 7 天。你需要在空气质量、精神值、忍耐值、人际关系与学习进度之间做选择。
-        最稳的路线不是一直忍，也不是一直开怼，而是在必要时使用道具、通风、换座，并推动公共卫生规则。
-      </p>
+      <h2>规则</h2>
       <ul>
-        <li><strong>忍了：</strong>学习推进快，但精神和忍耐下降。</li>
-        <li><strong>开窗：</strong>改善空气，但可能让关系小幅下降。</li>
-        <li><strong>委婉提醒：</strong>长期收益较高，适合触发好结局。</li>
-        <li><strong>直接开怼：</strong>短期有效，但关系损失大。</li>
-        <li><strong>空气清新剂：</strong>低污染有效，高污染可能反噬。</li>
-        <li><strong>宿舍公约：</strong>只在宿舍场景出现，是隐藏好结局关键。</li>
+        <li>每天 3 回合，第 3 回合固定为宿舍。</li>
+        <li>所有道具初始只有 1 次。</li>
+        <li>负面状态更强：硬忍、密闭、电梯、宿舍都会快速掉血。</li>
+        <li>直接开怼短期有效，但关系很容易归零。</li>
+        <li>宿舍公约是隐藏好结局关键。</li>
       </ul>
     </div>
   </div>
