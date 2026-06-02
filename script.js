@@ -1,166 +1,93 @@
 const MAX_DAY = 7;
 const MAX_ROUND = 3;
+const ACTIONS_PER_ROUND = 4;
 
 const scenes = [
-  {
-    id: "classroom",
-    name: "航南教室",
-    difficulty: 1.15,
-    text: "教室门一开，空气先给你来了个下马威。"
-  },
-  {
-    id: "elevator",
-    name: "电梯",
-    difficulty: 1.55,
-    text: "电梯门合上，副本开始。"
-  },
-  {
-    id: "dorm",
-    name: "宿舍",
-    difficulty: 1.65,
-    text: "你回到宿舍。真正的每日 Boss 刷新了。"
-  },
-  {
-    id: "canteen",
-    name: "食堂",
-    difficulty: 1.0,
-    text: "饭香和奇怪气味同时入场。"
-  },
-  {
-    id: "library",
-    name: "自习区",
-    difficulty: 1.1,
-    text: "自习区很安静，但气味不守规矩。"
-  },
-  {
-    id: "groupMeeting",
-    name: "小组讨论",
-    difficulty: 1.3,
-    text: "PPT 还没打开，空气已经开题。"
-  }
+  { id: "classroom", name: "航南教室", difficulty: 1.15, text: "教室门一开，空气先给你下马威。" },
+  { id: "elevator", name: "电梯", difficulty: 1.55, text: "电梯门合上，副本开始。" },
+  { id: "canteen", name: "食堂", difficulty: 1.0, text: "饭香和怪味同时入场。" },
+  { id: "library", name: "自习区", difficulty: 1.1, text: "这里很安静，但气味不守纪律。" },
+  { id: "groupMeeting", name: "小组讨论", difficulty: 1.3, text: "PPT 还没打开，空气已经开题。" },
+  { id: "dorm", name: "宿舍", difficulty: 1.65, text: "你回到宿舍。每日 Boss 刷新。" }
 ];
-
-const dormScene = scenes.find(s => s.id === "dorm");
 
 const characters = [
-  {
-    id: "winterType",
-    name: "冬眠型选手",
-    avatar: "🧥",
-    base: 55,
-    desc: "厚外套、乱头发，坚信冬天不出汗。",
-    line: "“冬天不用天天洗吧？”"
-  },
-  {
-    id: "sportType",
-    name: "运动直达型",
-    avatar: "🏀",
-    base: 82,
-    desc: "球鞋、短袖、汗味未冷却，刚下球场直达室内。",
-    line: "“我就坐一会儿。”"
-  },
-  {
-    id: "sockWizard",
-    name: "袜子炼金术士",
-    avatar: "🧦",
-    base: 92,
-    desc: "床边有神秘袜团，疑似正在培养文明。",
-    line: "“别动，我还要穿。”"
-  },
-  {
-    id: "perfumeCover",
-    name: "香水掩盖派",
-    avatar: "🧴",
-    base: 72,
-    desc: "香水喷得很努力，但底味更努力。",
-    line: "“我喷香水了啊。”"
-  },
-  {
-    id: "researchType",
-    name: "沉浸学习型",
-    avatar: "💻",
-    base: 66,
-    desc: "电脑不关，人不洗漱，灵感和气味都在持续输出。",
-    line: "“洗澡会打断思路。”"
-  },
-  {
-    id: "crowdedType",
-    name: "密闭叠加型",
-    avatar: "🧍‍♂️",
-    base: 96,
-    desc: "不是一个人，是一群人。空气直接进入困难模式。",
-    line: "“挤一挤就到了。”"
-  }
+  { id: "winter", name: "冬眠型选手", avatar: "🧥", base: 55, desc: "厚外套，乱头发，坚信冬天不用天天洗。", line: "“冬天没出汗吧？”" },
+  { id: "sport", name: "运动直达型", avatar: "🏀", base: 82, desc: "刚下球场，汗味还在热启动。", line: "“我就坐一会儿。”" },
+  { id: "sock", name: "袜子炼金术士", avatar: "🧦", base: 92, desc: "床边袜团疑似培养出文明。", line: "“别动，我还要穿。”" },
+  { id: "perfume", name: "香水掩盖派", avatar: "🧴", base: 72, desc: "香水很努力，底味更努力。", line: "“我喷香水了啊。”" },
+  { id: "study", name: "沉浸学习型", avatar: "💻", base: 66, desc: "电脑不关，人不洗漱，持续输出。", line: "“洗澡会打断思路。”" },
+  { id: "crowded", name: "密闭叠加型", avatar: "🧍‍♂️", base: 96, desc: "不是一个人，是一群人。", line: "“挤一挤就到了。”" },
+  { id: "normal", name: "普通闷热型", avatar: "😶", base: 42, desc: "没有特别严重，但空气很摆。", line: "“还行吧？”" }
 ];
 
-const randomEvents = [
+const events = [
   {
-    id: "closedRoom",
     name: "门窗紧闭",
     text: "窗户关死了。",
-    effect: s => {
+    sceneOnly: null,
+    apply: s => {
       s.air -= 18;
-      s.smellLevel += 16;
+      s.smell += 16;
       return "空气 -18，气味 +16";
     }
   },
   {
-    id: "afterSport",
     name: "运动后入场",
     text: "汗味增援抵达。",
-    effect: s => {
-      s.smellLevel += 30;
+    sceneOnly: null,
+    apply: s => {
+      s.smell += 30;
       s.patience -= 10;
       return "气味 +30，忍耐 -10";
     }
   },
   {
-    id: "sockCritical",
     name: "袜子暴击",
     text: "袜子完成进化。",
-    effect: s => {
-      s.smellLevel += 42;
+    sceneOnly: "dorm",
+    apply: s => {
+      s.smell += 42;
       s.sanity -= 20;
       return "气味 +42，理智 -20";
-    },
-    sceneOnly: "dorm"
+    }
   },
   {
-    id: "campusWind",
     name: "北航大风",
     text: "风来了，正义来了。",
-    effect: s => {
+    sceneOnly: null,
+    apply: s => {
       s.air += 22;
-      s.smellLevel -= 18;
+      s.smell -= 18;
       return "空气 +22，气味 -18";
     }
   },
   {
-    id: "deadline",
     name: "DDL 压顶",
     text: "你被迫硬学。",
-    effect: s => {
+    sceneOnly: null,
+    apply: s => {
       s.study += 16;
       s.hp -= 16;
       return "学习 +16，精神 -16";
     }
   },
   {
-    id: "powerOff",
     name: "突然停电",
     text: "黑暗放大了一切。",
-    effect: s => {
+    sceneOnly: null,
+    apply: s => {
       s.sanity -= 16;
       s.air -= 12;
       return "理智 -16，空气 -12";
     }
   },
   {
-    id: "miracleBath",
     name: "奇迹洗澡",
     text: "有人洗澡了。",
-    effect: s => {
-      s.smellLevel -= 45;
+    sceneOnly: null,
+    apply: s => {
+      s.smell -= 45;
       s.relationship += 8;
       return "气味 -45，关系 +8";
     }
@@ -179,7 +106,11 @@ function pick(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-function getDefaultState() {
+function shuffle(arr) {
+  return [...arr].sort(() => Math.random() - 0.5);
+}
+
+function defaultState() {
   return {
     day: 1,
     round: 1,
@@ -190,146 +121,75 @@ function getDefaultState() {
     courage: 50,
     relationship: 78,
     study: 0,
-    cleanliness: 92,
+    clean: 92,
     sanity: 88,
 
-    smellLevel: 65,
+    smell: 60,
     scene: scenes[0],
     character: characters[0],
     event: null,
 
-    maskUses: 1,
-    sprayUses: 1,
+    mask: 1,
+    spray: 1,
     mint: 1,
     detergent: 1,
     talkCard: 1,
 
     hasRule: false,
-    remindCount: 0,
-    explodeCount: 0,
-    escapeCount: 0,
+    remind: 0,
+    explode: 0,
+    escape: 0,
     windowOpened: false,
 
-    message: "",
+    currentActions: [],
+    story: "",
     effect: "",
-    gameOver: false,
-    currentActionIds: []
+    gameOver: false
   };
-}
-
-function startGame() {
-  state = getDefaultState();
-  $("startScreen").classList.remove("active");
-  $("endScreen").classList.remove("active");
-  $("gameScreen").classList.add("active");
-  newEncounter("第一天开始。活下去，顺便学习。");
-}
-
-function chooseScene() {
-  if (state.round === 3) return dormScene;
-  return pick(scenes.filter(s => s.id !== "dorm"));
-}
-
-function newEncounter(prefix = "") {
-  state.windowOpened = false;
-  state.scene = chooseScene();
-  state.character = state.scene.id === "dorm"
-    ? pick(characters.filter(c => ["sockWizard", "winterType", "researchType", "perfumeCover"].includes(c.id)))
-    : pick(characters);
-
-  const base = state.character.base * state.scene.difficulty;
-  const noise = Math.floor(Math.random() * 25) - 8;
-  const ruleBonus = state.hasRule && state.scene.id === "dorm" ? -32 : 0;
-  state.smellLevel = clamp(base + noise + ruleBonus, 15, 100);
-
-  const validEvents = randomEvents.filter(e => !e.sceneOnly || e.sceneOnly === state.scene.id);
-  state.event = Math.random() < 0.78 ? pick(validEvents) : null;
-
-  let eventEffect = "无额外事件";
-  if (state.event) eventEffect = state.event.effect(state);
-
-  state.message = prefix || state.scene.text;
-  state.effect = state.event ? `事件「${state.event.name}」：${state.event.text}｜${eventEffect}` : eventEffect;
-
-  // 每个新场景随机抽取 4 个可用行动，之后本回合内保持不变。
-  state.currentActionIds = chooseRandomActionIds();
-
-  applyPassiveDamage();
-  normalizeState();
-  render();
-  checkImmediateEnd();
-}
-
-function applyPassiveDamage(multiplier = 1) {
-  const hpLoss = Math.max(4, state.smellLevel * 0.115 * multiplier);
-  const airLoss = Math.max(4, state.smellLevel * 0.12 * multiplier);
-  const patienceLoss = Math.max(3, state.smellLevel * 0.08 * multiplier);
-
-  state.hp -= hpLoss;
-  state.air -= airLoss;
-  state.patience -= patienceLoss;
-  state.sanity -= state.smellLevel * 0.04 * multiplier;
-
-  if (state.scene.id === "elevator") {
-    state.hp -= 8;
-    state.sanity -= 8;
-  }
-
-  if (state.scene.id === "dorm") {
-    state.hp -= 6;
-    state.cleanliness -= state.hasRule ? 2 : 7;
-    state.relationship -= state.hasRule ? 0 : 2;
-  }
-}
-
-function normalizeState() {
-  ["hp", "air", "patience", "courage", "relationship", "study", "cleanliness", "sanity", "smellLevel"].forEach(key => {
-    state[key] = clamp(state[key]);
-  });
 }
 
 const actions = [
   {
     id: "endure",
     title: "忍了",
-    desc: "学习快，但掉状态很疼。",
+    desc: "学习快，但掉状态疼。",
     available: () => true,
     run: () => {
       state.study += 13;
       state.patience -= 22;
-      state.hp -= state.smellLevel * 0.22;
+      state.hp -= state.smell * 0.22;
       state.sanity -= 12;
-      state.message = "你忍了。知识进脑，气味入魂。";
-      state.effect = "学习 +13，忍耐 -22，精神和理智下降。";
+      state.story = "你忍了。知识进脑，气味入魂。";
+      state.effect = "学习 +13，忍耐 -22，精神下降。";
     }
   },
   {
     id: "mask",
     title: "戴口罩",
     desc: "仅 1 次，保命强。",
-    available: () => state.maskUses > 0,
+    available: () => state.mask > 0,
     run: () => {
-      state.maskUses -= 1;
+      state.mask -= 1;
       state.study += 8;
-      state.hp -= state.smellLevel * 0.05;
+      state.hp -= state.smell * 0.05;
       state.patience -= 4;
-      state.message = "你戴上口罩。鼻腔暂时停火。";
-      state.effect = "学习 +8，伤害大幅降低，口罩 -1。";
+      state.story = "你戴上口罩。鼻腔暂时停火。";
+      state.effect = "学习 +8，伤害降低，口罩 -1。";
     }
   },
   {
     id: "window",
     title: "开窗",
-    desc: "不能在电梯用。",
+    desc: "提升空气，关系小降。",
     available: () => state.scene.id !== "elevator" && !state.windowOpened,
     run: () => {
       state.air += 30;
-      state.smellLevel -= 24;
+      state.smell -= 24;
       state.patience += 5;
       state.relationship -= state.scene.id === "dorm" ? 8 : 5;
       state.windowOpened = true;
-      state.message = "你开窗。冷风进来，命也回来一点。";
-      state.effect = "空气 +30，气味 -24，关系小降。";
+      state.story = "你开窗。冷风进来，命也回来一点。";
+      state.effect = "空气 +30，气味 -24，关系下降。";
     }
   },
   {
@@ -341,108 +201,60 @@ const actions = [
       state.hp += 10;
       state.sanity += 8;
       state.study -= 8;
-      state.escapeCount += 1;
-      state.message = "你撤到上风口。尊重流体力学。";
-      state.effect = "精神 +10，理智 +8，学习 -8，逃离 +1。";
+      state.escape += 1;
+      state.story = "你撤到上风口。尊重流体力学。";
+      state.effect = "精神 +10，理智 +8，学习 -8。";
     }
   },
   {
     id: "gentle",
     title: "委婉提醒",
-    desc: "稳，但需要勇气。",
+    desc: "长期收益，消耗勇气。",
     available: () => state.courage >= 14,
     run: () => {
-      const hasCard = state.talkCard > 0;
-      if (hasCard) state.talkCard -= 1;
-
-      state.smellLevel -= 28;
+      const card = state.talkCard > 0;
+      if (card) state.talkCard -= 1;
+      state.smell -= 28;
       state.courage -= 18;
-      state.relationship -= hasCard ? 3 : 9;
-      state.remindCount += 1;
+      state.relationship -= card ? 3 : 9;
+      state.remind += 1;
       state.patience += 5;
-
-      state.message = "你委婉提醒：要不大家注意通风和换洗？";
-      state.effect = `气味 -28，勇气 -18，提醒 +1${hasCard ? "，话术卡抵消关系损失。" : "。"}`;
+      state.story = "你委婉提醒：大家注意通风和换洗。";
+      state.effect = card ? "气味 -28，话术卡 -1，关系小降。" : "气味 -28，勇气 -18，关系下降。";
     }
   },
   {
     id: "direct",
     title: "直接开怼",
-    desc: "强效，但危险。",
+    desc: "强效，但关系很危险。",
     available: () => true,
     run: () => {
-      state.smellLevel -= 50;
+      state.smell -= 50;
       state.relationship -= 38;
       state.courage -= 10;
-      state.explodeCount += 1;
-      state.message = "你说：能不能洗澡？空气安静了，人也安静了。";
+      state.explode += 1;
+      state.story = "你说：能不能洗澡？空气安静了，人也安静了。";
       state.effect = "气味 -50，关系 -38，爆发 +1。";
     }
   },
   {
     id: "spray",
-    title: "清新剂",
+    title: "空气清新剂",
     desc: "仅 1 次，高污染反噬。",
-    available: () => state.sprayUses > 0,
+    available: () => state.spray > 0,
     run: () => {
-      state.sprayUses -= 1;
-      if (state.smellLevel > 68) {
+      state.spray -= 1;
+      if (state.smell > 68) {
         state.air -= 28;
         state.sanity -= 22;
-        state.message = "清新剂失败。花香和臭味合成新物种。";
-        state.effect = "触发反噬：空气 -28，理智 -22。";
-        $("sceneVisual").classList.add("shake");
-        setTimeout(() => $("sceneVisual").classList.remove("shake"), 350);
+        state.story = "清新剂失败。花香和臭味合成新物种。";
+        state.effect = "反噬：空气 -28，理智 -22。";
       } else {
         state.air += 24;
-        state.smellLevel -= 14;
-        state.message = "清新剂短暂有效。";
-        state.effect = "空气 +24，气味 -14，清新剂 -1。";
+        state.smell -= 14;
+        state.story = "清新剂短暂有效。";
+        state.effect = "空气 +24，气味 -14。";
       }
-    }
-  },
-  {
-    id: "deepBreath",
-    title: "离场透气",
-    desc: "稳定恢复精神，但学习会慢。",
-    available: () => state.scene.id !== "elevator",
-    run: () => {
-      state.hp += 18;
-      state.sanity += 12;
-      state.patience += 6;
-      state.study -= 10;
-      state.escapeCount += 1;
-      state.message = "你离场透气两分钟。灵魂重新上线。";
-      state.effect = "精神 +18，理智 +12，忍耐 +6，学习 -10，逃离 +1。";
-    }
-  },
-  {
-    id: "shower",
-    title: "自己洗澡",
-    desc: "宿舍可用，恢复精神和洁净。",
-    available: () => state.scene.id === "dorm",
-    run: () => {
-      state.hp += 22;
-      state.sanity += 10;
-      state.cleanliness += 28;
-      state.air += 8;
-      state.study -= 8;
-      state.message = "你先去洗澡。嫌弃别人之前，自己先做示范。";
-      state.effect = "精神 +22，理智 +10，洁净 +28，空气 +8，学习 -8。";
-    }
-  },
-  {
-    id: "studyBreak",
-    title: "闭眼缓冲",
-    desc: "任何场景可用，小幅回血。",
-    available: () => true,
-    run: () => {
-      state.hp += 10;
-      state.sanity += 8;
-      state.patience += 4;
-      state.study -= 5;
-      state.message = "你闭眼十秒，假装世界很清新。";
-      state.effect = "精神 +10，理智 +8，忍耐 +4，学习 -5。";
     }
   },
   {
@@ -454,8 +266,8 @@ const actions = [
       state.mint -= 1;
       state.hp += 16;
       state.sanity += 14;
-      state.message = "你吃了薄荷糖。续命成功。";
-      state.effect = "精神 +16，理智 +14，薄荷糖 -1。";
+      state.story = "你吃了薄荷糖。续命成功。";
+      state.effect = "精神 +16，理智 +14。";
     }
   },
   {
@@ -466,60 +278,202 @@ const actions = [
     run: () => {
       state.detergent -= 1;
       state.air += 20;
-      state.smellLevel -= 42;
-      state.cleanliness += 8;
-      state.message = "洗衣液出场。衣物重新成为衣物。";
+      state.smell -= 42;
+      state.clean += 8;
+      state.story = "洗衣液出场。衣物重新成为衣物。";
       state.effect = "空气 +20，气味 -42，洁净 +8。";
     }
   },
   {
     id: "rule",
     title: "宿舍公约",
-    desc: "隐藏结局关键。",
+    desc: "宿舍可用，隐藏结局关键。",
     available: () => state.scene.id === "dorm" && !state.hasRule && state.courage >= 24,
     run: () => {
       state.hasRule = true;
       state.courage -= 24;
       state.relationship -= 12;
-      state.remindCount += 1;
+      state.remind += 1;
       state.air += 12;
-      state.smellLevel -= 28;
-      state.message = "你提出宿舍公约：通风、换洗、运动后及时处理。";
-      state.effect = "长期降低宿舍污染。勇气 -24，关系 -12。";
+      state.smell -= 28;
+      state.story = "你提出宿舍公约：通风、换洗、运动后处理。";
+      state.effect = "长期降低宿舍污染，关系 -12。";
+    }
+  },
+  {
+    id: "deepBreath",
+    title: "离场透气",
+    desc: "恢复强，但学习变慢。",
+    available: () => state.scene.id !== "elevator",
+    run: () => {
+      state.hp += 18;
+      state.sanity += 12;
+      state.patience += 6;
+      state.study -= 10;
+      state.escape += 1;
+      state.story = "你离场透气两分钟。灵魂重新上线。";
+      state.effect = "精神 +18，理智 +12，学习 -10。";
+    }
+  },
+  {
+    id: "shower",
+    title: "自己洗澡",
+    desc: "宿舍可用，恢复精神洁净。",
+    available: () => state.scene.id === "dorm",
+    run: () => {
+      state.hp += 22;
+      state.sanity += 10;
+      state.clean += 28;
+      state.air += 8;
+      state.study -= 8;
+      state.story = "你先去洗澡。自己先做示范。";
+      state.effect = "精神 +22，洁净 +28，学习 -8。";
+    }
+  },
+  {
+    id: "studyBreak",
+    title: "闭眼缓冲",
+    desc: "小幅回血，任何场景可用。",
+    available: () => true,
+    run: () => {
+      state.hp += 10;
+      state.sanity += 8;
+      state.patience += 4;
+      state.study -= 5;
+      state.story = "你闭眼十秒，假装世界很清新。";
+      state.effect = "精神 +10，理智 +8，学习 -5。";
     }
   }
 ];
 
-function doAction(actionId) {
-  if (state.gameOver) return;
-  const action = actions.find(a => a.id === actionId);
-  if (!action || !action.available()) return;
-
-  action.run();
-  applyPassiveDamage(0.7);
-  normalizeState();
-  render();
-
-  const ending = getFailureEnding();
-  if (ending) {
-    endGame(ending);
-    return;
-  }
-
-  setTimeout(nextTurn, 420);
+function startGame() {
+  state = defaultState();
+  show("gameScreen");
+  newRound("第一天开始。活下去，顺便学习。");
 }
 
-function nextTurn() {
-  if (state.gameOver) return;
+function show(id) {
+  ["startScreen", "gameScreen", "endScreen"].forEach(s => $(s).classList.remove("active"));
+  $(id).classList.add("active");
+}
 
-  if (state.study >= 100 && state.day >= 5) {
-    endGame(getSuccessEnding());
-    return;
+function chooseScene() {
+  if (state.round === 3) {
+    return scenes.find(s => s.id === "dorm");
   }
+  return pick(scenes.filter(s => s.id !== "dorm"));
+}
+
+function chooseCharacter() {
+  if (state.scene.id === "dorm") {
+    return pick(characters.filter(c => ["winter", "sock", "perfume", "study"].includes(c.id)));
+  }
+  if (state.scene.id === "elevator") {
+    return pick(characters.filter(c => ["sport", "perfume", "crowded", "winter"].includes(c.id)));
+  }
+  return pick(characters);
+}
+
+function chooseEvent() {
+  const pool = events.filter(e => !e.sceneOnly || e.sceneOnly === state.scene.id);
+  return Math.random() < 0.78 ? pick(pool) : null;
+}
+
+function newRound(prefix = "") {
+  state.windowOpened = false;
+  state.scene = chooseScene();
+  state.character = chooseCharacter();
+
+  const ruleBonus = state.hasRule && state.scene.id === "dorm" ? -32 : 0;
+  const noise = Math.floor(Math.random() * 25) - 8;
+  state.smell = clamp(state.character.base * state.scene.difficulty + noise + ruleBonus, 15, 100);
+
+  state.event = chooseEvent();
+  let eventEffect = "无额外事件";
+  if (state.event) eventEffect = state.event.apply(state);
+
+  state.story = prefix || state.scene.text;
+  state.effect = state.event ? `事件「${state.event.name}」：${state.event.text}｜${eventEffect}` : eventEffect;
+
+  passiveDamage();
+  normalize();
+  state.currentActions = chooseFourActions();
+
+  render();
+  checkEndNow();
+}
+
+function chooseFourActions() {
+  const available = actions.filter(a => a.available());
+
+  const recoverIds = ["deepBreath", "studyBreak", "shower", "mint"];
+  const handleIds = ["gentle", "direct", "window", "move", "detergent", "rule", "spray", "mask"];
+
+  const recoverPool = available.filter(a => recoverIds.includes(a.id));
+  const handlePool = available.filter(a => handleIds.includes(a.id));
+
+  const chosen = [];
+
+  if (recoverPool.length > 0) chosen.push(pick(recoverPool));
+  if (handlePool.length > 0) {
+    const h = pick(handlePool);
+    if (!chosen.some(a => a.id === h.id)) chosen.push(h);
+  }
+
+  shuffle(available).forEach(a => {
+    if (chosen.length < ACTIONS_PER_ROUND && !chosen.some(x => x.id === a.id)) {
+      chosen.push(a);
+    }
+  });
+
+  return chosen.slice(0, ACTIONS_PER_ROUND);
+}
+
+function passiveDamage(mult = 1) {
+  state.hp -= Math.max(4, state.smell * 0.115 * mult);
+  state.air -= Math.max(4, state.smell * 0.12 * mult);
+  state.patience -= Math.max(3, state.smell * 0.08 * mult);
+  state.sanity -= state.smell * 0.04 * mult;
+
+  if (state.scene.id === "elevator") {
+    state.hp -= 8;
+    state.sanity -= 8;
+  }
+
+  if (state.scene.id === "dorm") {
+    state.hp -= 6;
+    state.clean -= state.hasRule ? 2 : 7;
+    state.relationship -= state.hasRule ? 0 : 2;
+  }
+}
+
+function normalize() {
+  ["hp", "air", "patience", "courage", "relationship", "study", "clean", "sanity", "smell"].forEach(k => {
+    state[k] = clamp(state[k]);
+  });
+}
+
+function doAction(id) {
+  const action = actions.find(a => a.id === id);
+  if (!action || !action.available() || state.gameOver) return;
+
+  action.run();
+  passiveDamage(0.7);
+  normalize();
+  render();
+
+  const fail = getFailure();
+  if (fail) return endGame(fail);
+
+  setTimeout(nextRound, 420);
+}
+
+function nextRound() {
+  if (state.study >= 100 && state.day >= 5) return endGame(getSuccess());
 
   if (state.round < MAX_ROUND) {
     state.round += 1;
-    newEncounter();
+    newRound();
   } else {
     endDay();
   }
@@ -528,179 +482,133 @@ function nextTurn() {
 function endDay() {
   state.day += 1;
   state.round = 1;
+
   state.hp += 6;
   state.patience += 5;
   state.sanity += 3;
-  state.cleanliness -= 7;
+  state.clean -= 7;
   state.air = Math.max(state.air, 45);
 
-  normalizeState();
+  normalize();
 
   if (state.day > MAX_DAY) {
-    endGame(getSuccessEnding());
+    endGame(getSuccess());
   } else {
-    newEncounter("新的一天。状态恢复很少，危机继续。");
+    newRound("新的一天。状态恢复很少，危机继续。");
   }
 }
 
-function getFailureEnding() {
+function getFailure() {
   if (state.hp <= 0) return { title: "精神阵亡", text: "你没被考试击倒，但被空气击倒了。" };
   if (state.air <= 0) return { title: "生化警报", text: "空气归零。窗户和洗澡都不是摆设。" };
   if (state.patience <= 0) return { title: "忍耐崩溃", text: "你忍到极限，场面开始不可控。" };
   if (state.relationship <= 0) return { title: "宿舍冷战", text: "气味战赢了，人际关系没了。" };
-  if (state.cleanliness <= 0) return { title: "你也成为传说", text: "你忘了自己也要洗澡。屠龙者终成龙。" };
+  if (state.clean <= 0) return { title: "你也成为传说", text: "你忘了自己也要洗澡。屠龙者终成龙。" };
   if (state.sanity <= 0) return { title: "鼻腔飞升", text: "你闻不到了，不是赢了，是系统离线了。" };
   return null;
 }
 
-function getSuccessEnding() {
-  if (state.hasRule && state.remindCount >= 4 && state.relationship > 40) {
+function getSuccess() {
+  if (state.hasRule && state.remind >= 4 && state.relationship > 40) {
     return { title: "隐藏结局：文明宿舍倡议人", text: "你用沟通和规则解决了长期问题。高级，真的高级。" };
   }
-  if (state.study >= 100 && state.remindCount >= 3 && state.relationship > 45 && state.sanity > 35) {
+  if (state.study >= 100 && state.remind >= 3 && state.relationship > 45 && state.sanity > 35) {
     return { title: "最佳结局：清新航南", text: "你完成学习，也守住了空气。文明从一次换洗开始。" };
   }
-  if (state.escapeCount >= 5) {
-    return { title: "回避型生存", text: "你靠上风口活了下来。没解决问题，但很会保命。" };
-  }
-  if (state.explodeCount >= 3) {
-    return { title: "爆发型勇士", text: "爽文路线达成，社交余震也达成。" };
-  }
+  if (state.escape >= 5) return { title: "回避型生存", text: "你靠上风口活了下来。没解决问题，但很会保命。" };
+  if (state.explode >= 3) return { title: "爆发型勇士", text: "爽文路线达成，社交余震也达成。" };
   return { title: "普通结局：成功存活", text: "你撑过一周。建议奖励自己一口新鲜空气。" };
 }
 
-function checkImmediateEnd() {
-  const ending = getFailureEnding();
-  if (ending) endGame(ending);
+function checkEndNow() {
+  const fail = getFailure();
+  if (fail) endGame(fail);
 }
 
 function endGame(ending) {
   state.gameOver = true;
-  $("gameScreen").classList.remove("active");
-  $("endScreen").classList.add("active");
+  show("endScreen");
   $("endingTitle").textContent = ending.title;
   $("endingText").textContent = ending.text;
-  $("endingStats").innerHTML = `
-    <div><span>学习</span><strong>${state.study}</strong></div>
-    <div><span>空气</span><strong>${state.air}</strong></div>
-    <div><span>精神</span><strong>${state.hp}</strong></div>
-    <div><span>忍耐</span><strong>${state.patience}</strong></div>
-    <div><span>关系</span><strong>${state.relationship}</strong></div>
-    <div><span>提醒</span><strong>${state.remindCount}</strong></div>
-  `;
+  $("endingStats").innerHTML = [
+    ["学习", state.study],
+    ["空气", state.air],
+    ["精神", state.hp],
+    ["忍耐", state.patience],
+    ["关系", state.relationship],
+    ["提醒", state.remind]
+  ].map(([k, v]) => `<div><span>${k}</span><b>${v}</b></div>`).join("");
 }
 
-function statColor(value) {
-  if (value <= 25) return "linear-gradient(90deg, #ef4444, #f97316)";
-  if (value <= 55) return "linear-gradient(90deg, #f59e0b, #facc15)";
-  return "linear-gradient(90deg, #5d7cff, #7c3aed)";
+function color(v) {
+  if (v <= 25) return "linear-gradient(90deg,#ef4444,#f97316)";
+  if (v <= 55) return "linear-gradient(90deg,#f59e0b,#facc15)";
+  return "linear-gradient(90deg,#5967ff,#7c3aed)";
 }
 
 function renderStats() {
-  const stats = [
+  const list = [
     ["空气质量", state.air],
     ["精神值", state.hp],
     ["忍耐值", state.patience],
     ["学习进度", state.study],
     ["社交勇气", state.courage],
     ["人际关系", state.relationship],
-    ["自身洁净度", state.cleanliness],
+    ["自身洁净度", state.clean],
     ["理智值", state.sanity]
   ];
 
-  $("stats").innerHTML = stats.map(([name, value]) => `
+  $("stats").innerHTML = list.map(([name, value]) => `
     <div class="stat">
-      <div class="stat-head"><span>${name}</span><strong>${value}</strong></div>
-      <div class="bar"><div style="width:${value}%; background:${statColor(value)}"></div></div>
+      <div class="stat-head"><span>${name}</span><b>${value}</b></div>
+      <div class="bar"><div class="fill" style="width:${value}%;background:${color(value)}"></div></div>
     </div>
   `).join("");
 }
 
 function renderInventory() {
   const items = [
-    `😷 口罩 × ${state.maskUses}`,
-    `🌫️ 清新剂 × ${state.sprayUses}`,
+    `😷 口罩 × ${state.mask}`,
+    `🌫️ 清新剂 × ${state.spray}`,
     `🍃 薄荷糖 × ${state.mint}`,
     `🧴 洗衣液 × ${state.detergent}`,
     `💬 话术卡 × ${state.talkCard}`,
     state.hasRule ? "📜 公约：有" : "📜 公约：无"
   ];
 
-  $("inventory").innerHTML = `<div class="inventory">${items.map(i => `<span class="item">${i}</span>`).join("")}</div>`;
-}
-
-function shuffleArray(arr) {
-  return [...arr].sort(() => Math.random() - 0.5);
-}
-
-function chooseRandomActionIds() {
-  const allAvailable = actions
-    .filter(action => action.available())
-    .map(action => action.id);
-
-  // 为了避免完全随机导致“没有可恢复选项”或“没有互动选项”，设置一点点保底。
-  const recoveryPool = ["deepBreath", "studyBreak", "shower", "mint"].filter(id => {
-    const action = actions.find(a => a.id === id);
-    return action && action.available();
-  });
-
-  const interactionPool = ["gentle", "direct", "window", "move"].filter(id => {
-    const action = actions.find(a => a.id === id);
-    return action && action.available();
-  });
-
-  const selected = [];
-
-  if (recoveryPool.length > 0) selected.push(pick(recoveryPool));
-  if (interactionPool.length > 0) selected.push(pick(interactionPool));
-
-  shuffleArray(allAvailable).forEach(id => {
-    if (selected.length < 4 && !selected.includes(id)) selected.push(id);
-  });
-
-  // 极端情况下如果可用选项不足 4 个，就只显示实际可用的，不强行放灰色按钮。
-  return selected.slice(0, 4);
+  $("inventory").innerHTML = items.map(i => `<span class="chip">${i}</span>`).join("");
 }
 
 function renderActions() {
-  if (!state.currentActionIds || state.currentActionIds.length === 0) {
-    state.currentActionIds = chooseRandomActionIds();
-  }
-
-  const selectedActions = state.currentActionIds
-    .map(id => actions.find(a => a.id === id))
-    .filter(action => action && action.available());
-
-  $("actions").innerHTML = selectedActions.map(action => {
-    return `
-      <button class="action-btn" onclick="doAction('${action.id}')">
-        <strong>${action.title}</strong>
-        <span>${action.desc}</span>
-      </button>
-    `;
-  }).join("");
+  $("actions").innerHTML = state.currentActions.map(a => `
+    <button class="action" onclick="doAction('${a.id}')">
+      <b>${a.title}</b>
+      <span>${a.desc}</span>
+    </button>
+  `).join("");
 }
 
 function render() {
-  $("dayNum").textContent = state.day;
-  $("roundNum").textContent = state.round;
-  $("sceneName").textContent = state.scene.name;
-  $("smellBadge").textContent = `气味强度 ${state.smellLevel}`;
+  $("dayText").textContent = `${state.day} / ${MAX_DAY}`;
+  $("roundText").textContent = `${state.round} / ${MAX_ROUND}`;
+  $("sceneText").textContent = state.scene.name;
 
-  $("avatar").textContent = state.character.avatar;
+  $("smellText").textContent = `气味强度 ${state.smell}`;
+  $("avatarText").textContent = state.character.avatar;
   $("characterName").textContent = state.character.name;
   $("characterDesc").textContent = `${state.character.desc} ${state.character.line}`;
 
-  $("eventLabel").textContent = state.event ? `事件：${state.event.name}` : "普通遭遇";
-  $("storyTitle").textContent = `${state.scene.name}`;
-  $("storyText").textContent = state.message;
+  $("eventText").textContent = state.event ? `随机事件：${state.event.name}` : "普通遭遇";
+  $("storyTitle").textContent = state.scene.name;
+  $("storyText").textContent = state.story;
   $("effectText").textContent = state.effect;
-  $("subtitle").textContent = state.air < 35 ? "警告：空气质量红区。" : "硬核模式：请谨慎选择。";
 
-  $("remindCount").textContent = state.remindCount;
-  $("explodeCount").textContent = state.explodeCount;
-  $("escapeCount").textContent = state.escapeCount;
-  $("ruleState").textContent = state.hasRule ? "有" : "无";
+  $("subtitle").textContent = state.air < 35 ? "警告：空气质量红区。" : "每回合只随机出现 4 个选项。";
+
+  $("remindText").textContent = state.remind;
+  $("explodeText").textContent = state.explode;
+  $("escapeText").textContent = state.escape;
+  $("ruleText").textContent = state.hasRule ? "有" : "无";
 
   renderStats();
   renderInventory();
@@ -708,12 +616,9 @@ function render() {
 }
 
 $("startBtn").addEventListener("click", startGame);
-$("restartBtn").addEventListener("click", restartGame);
-$("againBtn").addEventListener("click", () => {
-  $("endScreen").classList.remove("active");
-  $("startScreen").classList.add("active");
-});
-$("helpBtn").addEventListener("click", () => $("modal").classList.remove("hidden"));
+$("restartBtn").addEventListener("click", startGame);
+$("againBtn").addEventListener("click", () => show("startScreen"));
+$("rulesBtn").addEventListener("click", () => $("modal").classList.remove("hidden"));
 $("closeModal").addEventListener("click", () => $("modal").classList.add("hidden"));
 $("modal").addEventListener("click", e => {
   if (e.target.id === "modal") $("modal").classList.add("hidden");

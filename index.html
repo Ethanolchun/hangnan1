@@ -3,110 +3,101 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>航南生存模拟器：气味危机 v2</title>
+  <title>航南生存模拟器：气味危机</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <main id="app">
     <section id="startScreen" class="screen active">
-      <div class="hero-card">
-        <div class="tag">Hard Mode · v2</div>
+      <div class="card hero">
+        <span class="tag">V6 Clean · Random 4 Choices</span>
         <h1>航南生存模拟器</h1>
         <h2>气味危机</h2>
-        <p class="intro">
-          七天生存挑战。每天 3 回合，<strong>第 3 回合固定回宿舍</strong>。
-          道具仅 1 次，负面效果增强，更容易翻车。
+        <p>
+          每天 3 回合，共 7 天。第 3 回合固定回宿舍。每回合只随机出现
+          <strong>4 个可用选项</strong>，道具全部只有 1 次。
         </p>
-        <div class="mini-rules">
-          <div><b>🎯 目标</b><p>完成学习进度，同时保住空气、精神和关系。</p></div>
-          <div><b>🛏️ 宿舍</b><p>每天必刷宿舍场景，长期污染会叠加。</p></div>
-          <div><b>👤 人物</b><p>每回合出现具体人物画像，不再只是大场景。</p></div>
-        </div>
-        <button id="startBtn" class="primary-btn">开始硬核生存</button>
+        <button class="primary" id="startBtn">开始游戏</button>
       </div>
     </section>
 
     <section id="gameScreen" class="screen">
       <header class="topbar">
         <div>
-          <h1>航南生存模拟器：气味危机</h1>
-          <p id="subtitle">公共空间卫生外部性观察中……</p>
+          <h1>航南生存模拟器</h1>
+          <p id="subtitle">硬核模式：少选项、高风险、每天宿舍 Boss。</p>
         </div>
-        <div class="top-actions">
-          <button id="helpBtn" class="ghost-btn">规则</button>
-          <button id="restartBtn" class="ghost-btn">重开</button>
+        <div>
+          <button class="ghost" id="rulesBtn">规则</button>
+          <button class="ghost" id="restartBtn">重开</button>
         </div>
       </header>
 
-      <section class="dashboard">
-        <div class="day-card"><span>第</span><strong id="dayNum">1</strong><span>天</span></div>
-        <div class="day-card"><span>回合</span><strong id="roundNum">1</strong><span>/ 3</span></div>
-        <div class="day-card scene-card"><span>当前场景</span><strong id="sceneName">航南教室</strong></div>
+      <section class="meta-grid">
+        <div class="meta"><span>天数</span><b id="dayText">1 / 7</b></div>
+        <div class="meta"><span>回合</span><b id="roundText">1 / 3</b></div>
+        <div class="meta wide"><span>场景</span><b id="sceneText">航南教室</b></div>
       </section>
 
-      <section class="layout">
-        <aside class="stats-panel">
+      <section class="game-grid">
+        <aside class="panel">
           <h3>状态</h3>
           <div id="stats"></div>
 
-          <h3>背包：每局仅 1 次</h3>
-          <div id="inventory"></div>
+          <h3>背包</h3>
+          <div id="inventory" class="chips"></div>
 
           <h3>记录</h3>
-          <div class="record-grid">
-            <div>委婉提醒 <strong id="remindCount">0</strong></div>
-            <div>爆发次数 <strong id="explodeCount">0</strong></div>
-            <div>逃离次数 <strong id="escapeCount">0</strong></div>
-            <div>宿舍公约 <strong id="ruleState">无</strong></div>
+          <div class="records">
+            <div>提醒 <b id="remindText">0</b></div>
+            <div>爆发 <b id="explodeText">0</b></div>
+            <div>逃离 <b id="escapeText">0</b></div>
+            <div>公约 <b id="ruleText">无</b></div>
           </div>
         </aside>
 
-        <section class="story-panel">
-          <div class="scene-visual" id="sceneVisual">
-            <div class="warning-badge" id="smellBadge">气味强度 50</div>
-
-            <div class="character-card">
-              <div class="avatar" id="avatar">🧍</div>
-              <div>
-                <h2 id="characterName">人物</h2>
-                <p id="characterDesc">人物描述</p>
-              </div>
+        <section class="main-panel">
+          <div class="character-box">
+            <div class="smell" id="smellText">气味强度 50</div>
+            <div class="avatar" id="avatarText">🧍</div>
+            <div>
+              <h2 id="characterName">人物</h2>
+              <p id="characterDesc">人物描述</p>
             </div>
           </div>
 
-          <article class="story-card">
-            <div class="event-label" id="eventLabel">普通遭遇</div>
-            <h2 id="storyTitle">场景标题</h2>
-            <p id="storyText">场景描述</p>
-            <p id="effectText" class="effect-text"></p>
+          <article class="story">
+            <span class="event" id="eventText">普通遭遇</span>
+            <h2 id="storyTitle">标题</h2>
+            <p id="storyText">文本</p>
+            <p class="effect" id="effectText">效果</p>
           </article>
 
-          <div class="action-grid" id="actions"></div>
+          <div class="actions" id="actions"></div>
         </section>
       </section>
     </section>
 
     <section id="endScreen" class="screen">
-      <div class="end-card">
-        <div class="tag">Ending</div>
-        <h1 id="endingTitle">结局标题</h1>
-        <p id="endingText">结局描述</p>
-        <div id="endingStats" class="ending-stats"></div>
-        <button id="againBtn" class="primary-btn">再来一局</button>
+      <div class="card end">
+        <span class="tag">Ending</span>
+        <h1 id="endingTitle">结局</h1>
+        <p id="endingText">描述</p>
+        <div class="ending-grid" id="endingStats"></div>
+        <button class="primary" id="againBtn">再来一局</button>
       </div>
     </section>
   </main>
 
-  <div id="modal" class="modal hidden">
+  <div class="modal hidden" id="modal">
     <div class="modal-card">
-      <button id="closeModal" class="close-btn">×</button>
+      <button id="closeModal" class="close">×</button>
       <h2>规则</h2>
       <ul>
-        <li>每天 3 回合，第 3 回合固定为宿舍。</li>
-        <li>所有道具初始只有 1 次，但新增了非道具恢复选项：离场透气、闭眼缓冲、自己洗澡。</li>
-        <li>负面状态较强：硬忍、密闭、电梯、宿舍都会掉血，需要主动恢复。</li>
-        <li>直接开怼短期有效，但关系很容易归零。</li>
-        <li>宿舍公约是隐藏好结局关键。</li>
+        <li>每天 3 回合，第 3 回合必定是宿舍。</li>
+        <li>每回合随机抽取 4 个当前可用选项，只显示 4 个。</li>
+        <li>口罩、清新剂、薄荷糖、洗衣液、话术卡都只有 1 次。</li>
+        <li>精神、空气、忍耐、关系、洁净或理智归零都会失败。</li>
       </ul>
     </div>
   </div>
